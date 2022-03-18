@@ -52,7 +52,7 @@ public class StockData implements Serializable {
     private double ma5;
     private double maV_5;
 
-    private String deleted;
+
 
 
 }

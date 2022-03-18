@@ -7,6 +7,8 @@ import com.icheer.stock.system.CSI300.mapper.CSI300StockMapper;
 import com.icheer.stock.system.CSI300.service.CSI300StockService;
 import com.icheer.stock.system.stockData.entity.StockData;
 import com.icheer.stock.system.stockData.service.StockDataService;
+import com.icheer.stock.system.stockInfo.entity.StockInfo;
+import com.icheer.stock.system.stockInfo.service.StockInfoService;
 import com.icheer.stock.system.user.entity.WxUser;
 import com.icheer.stock.system.user.service.UserService;
 import com.icheer.stock.system.user.service.WxLoginService;
@@ -47,7 +49,7 @@ public class AppBusinessController  extends BaseController {
     private StockDataService stockDataService;
 
     @Resource
-    private CSI300StockService csi300StockService;
+    private StockInfoService stockInfoService;
 
 
 
@@ -119,6 +121,31 @@ public class AppBusinessController  extends BaseController {
 //
 //            System.out.println(obj);
 //        }
+
+    }
+
+    /**
+     * 搜索股票数据
+     * @param stockKey
+     * By   个股代码 or 名称
+     *
+     */
+    @RequestMapping("/search_stockInfo")
+    @ResponseBody
+    public Result search_stockInfo(@RequestBody StockInfo stockKey){
+
+        startPage();
+        ExcludeEmptyQueryWrapper<StockInfo> stockQuery = new ExcludeEmptyQueryWrapper<>();
+        stockQuery.eq("deleted",0);
+        if (stockKey.getCode()!=null)
+        {
+            stockQuery.eq("code",stockKey.getCode());
+        }else
+        {stockQuery.like("name",stockKey.getName());}
+        List<StockInfo> stocks= stockInfoService.list(stockQuery);
+        /**及其100日数据**/
+
+        return  new Result(200,"success",getDataTable(stocks));
 
     }
 

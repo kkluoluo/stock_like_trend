@@ -3,12 +3,10 @@ package com.icheer.stock.controller;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.icheer.stock.system.CSI300.mapper.CSI300StockMapper;
-import com.icheer.stock.system.CSI300.service.CSI300StockService;
-import com.icheer.stock.system.stockData.entity.StockData;
-import com.icheer.stock.system.stockData.service.StockDataService;
 import com.icheer.stock.system.stockInfo.entity.StockInfo;
 import com.icheer.stock.system.stockInfo.service.StockInfoService;
+import com.icheer.stock.system.tradeData.entity.TradeData;
+import com.icheer.stock.system.tradeData.service.TradeDataService;
 import com.icheer.stock.system.user.entity.WxUser;
 import com.icheer.stock.system.user.service.UserService;
 import com.icheer.stock.system.user.service.WxLoginService;
@@ -22,6 +20,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,11 +44,13 @@ public class AppBusinessController  extends BaseController {
 
 
 
-    @Resource
-    private StockDataService stockDataService;
+
 
     @Resource
     private StockInfoService stockInfoService;
+
+    @Resource
+    private TradeDataService tradeDataService;
 
 
 
@@ -89,9 +90,10 @@ public class AppBusinessController  extends BaseController {
         pageDomain.setPageSize(20);
 
         startPage();
-        List<StockData> dataList = stockDataService.list();
-        System.out.println(getDataTable(dataList));
-        return new Result(200,"",getDataTable(dataList));
+        String code = "000001";
+        String table_name    = stockInfoService.getTableNameByCode(code);
+        List<TradeData> list = tradeDataService.listDescByTradeDate(table_name,100);
+        return new Result(200,"",getDataTable(list));
     }
 
     public static void httpPostForStockList() {
@@ -126,28 +128,81 @@ public class AppBusinessController  extends BaseController {
 
     /**
      * 搜索股票数据
-     * @param stockKey
-     * By   个股代码 or 名称
+     * @param stockMap
+     *   个股代码
      *
      */
-    @RequestMapping("/search_stockInfo")
+    @RequestMapping("/search_stock")
     @ResponseBody
-    public Result search_stockInfo(@RequestBody StockInfo stockKey){
+    public Result search_stockByCode(@RequestBody StockMap stockMap ){
+
+        startPage();
+        List<StockTradeResult> stockTradeResults = new ArrayList<>();
+        if (stockMap.getCode()!=null & stockMap.getCode()!="")
+        {
+            StockInfo stock= stockInfoService.getOneByCode(stockMap.getCode());
+            /**及其100日数据**/
+            if(stock != null)
+            {
+                String table_name       = stockInfoService.getTableNameByCode(stockMap.getCode());
+                List<TradeData> list    = tradeDataService.listDescByTradeDate(table_name,100);
+                StockTradeResult result = new StockTradeResult();
+                result.setStockInfo(stock);
+                result.setTradeDataList(list);
+                stockTradeResults.add(result);
+            }
+        }else
+        {
+            ExcludeEmptyQueryWrapper<StockInfo> stockQuery = new ExcludeEmptyQueryWrapper<>();
+            stockQuery.eq("deleted",0);
+            stockQuery.like("name",stockMap.getName());
+            List<StockInfo> stocks= stockInfoService.list(stockQuery);
+            if (stocks != null)
+            {
+                for(StockInfo one:stocks)
+                {
+                    String table_name       = stockInfoService.getTableNameByCode(one.getCode());
+                    List<TradeData> list    = tradeDataService.listDescByTradeDate(table_name,100);
+                    StockTradeResult result = new StockTradeResult();
+                    result.setStockInfo(one);
+                    result.setTradeDataList(list);
+                    stockTradeResults.add(result);
+                }
+            }
+        }
+        return new Result(200,"success",getDataTable(stockTradeResults));
+    }
+
+    /**
+     * 搜索股票数据
+     * @param stockKey
+     * By   名称搜索
+     *
+     */
+    @RequestMapping("/search_stockByName")
+    @ResponseBody
+    public Result search_stockByName(@RequestBody StockInfo stockKey){
 
         startPage();
         ExcludeEmptyQueryWrapper<StockInfo> stockQuery = new ExcludeEmptyQueryWrapper<>();
         stockQuery.eq("deleted",0);
-        if (stockKey.getCode()!=null)
-        {
-            stockQuery.eq("code",stockKey.getCode());
-        }else
-        {stockQuery.like("name",stockKey.getName());}
+        stockQuery.like("name",stockKey.getName());
         List<StockInfo> stocks= stockInfoService.list(stockQuery);
-        /**及其100日数据**/
-
         return  new Result(200,"success",getDataTable(stocks));
 
     }
 
+    /**
+     * 处理沪深300权重股
+     */
+    @RequestMapping("/setCSI3000")
+    @ResponseBody
+    public Result setCSI300(@RequestBody StockMap stockMap)
+    {
+        startPage();
 
+        List <StockInfo> list=stockInfoService.getCSI300List();
+
+        return new Result(200,"",getDataTable(list));
+    }
 }

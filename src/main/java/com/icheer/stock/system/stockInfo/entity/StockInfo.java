@@ -25,6 +25,8 @@ public class StockInfo implements Serializable {
     private long id;
     /** 股票代码*/
     private String code;
+    /** 股票代码*/
+    private String tsCode;
     /** 股票简称*/
     private String name;
     /** 总股本*/
@@ -34,13 +36,17 @@ public class StockInfo implements Serializable {
     /**所属行业 */
     private String industry;
     /** 上市日期*/
-    private LocalDate listedDate;
+    private LocalDate listDate;
     /** 总市值*/
     private String totalCapitalization;
     /** 流通市值*/
     private String floatCapitalization;
     /** 板块*/
     private String plate;
+    /** 沪深300权重股标志位*/
+    private String csi300Flag;
+    /** 沪深300权重股--权重*/
+    private double csi300Weight;
     /** 删除标志位*/
     private String deleted;
 }

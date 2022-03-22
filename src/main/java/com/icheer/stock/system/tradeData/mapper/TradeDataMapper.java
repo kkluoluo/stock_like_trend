@@ -17,4 +17,9 @@ public interface TradeDataMapper extends BaseMapper<TradeData> {
     @SelectProvider(type=TradeDataProvider.class,method="listDescByTradeDate")
     public List<TradeData> listDescByTradeDate(String table_name, Integer range);
 
+    @SelectProvider(type=TradeDataProvider.class,method="getKeyList")
+    public List<Double> getKeyList(String table_name, String key,Integer range);
+
+    @SelectProvider(type=TradeDataProvider.class,method="StringKeyList")
+    public List<String> getStringKeyList(String table_name, String key,Integer range);
 }

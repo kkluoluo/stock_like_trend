@@ -9,7 +9,7 @@ public interface StockInfoService extends IService<StockInfo> {
 
 
     /**获取表名 */
-    public  String  getTableNameByCode(String code);
+//    public  String  getTableNameByCode(String code);
 
     /**getOneByCode */
     public  StockInfo  getOneByCode(String code);

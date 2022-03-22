@@ -10,10 +10,16 @@ import java.util.List;
 public interface TradeDataService  extends IService<TradeData> {
 
     /**get list By table_name */
-    public List<TradeData> list(String table_name);
+    public List<TradeData> list(String code);
 
     /**倒序 最新 100 条记录 */
-    public List<TradeData> listDescByTradeDate(String table_name, Integer range);
+    public List<TradeData> listDescByTradeDate(String code, Integer range);
+
+    /**倒序 获取字段key 列表 */
+    public List<Double> getKeyList(String code, String key ,Integer range);
+
+    /**倒序 获取字段key 列表 */
+    public List<String> listStringByKey(String code, String key ,Integer range);
 
 
 }

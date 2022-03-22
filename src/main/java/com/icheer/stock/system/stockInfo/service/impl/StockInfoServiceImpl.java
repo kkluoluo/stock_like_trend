@@ -21,14 +21,14 @@ public class StockInfoServiceImpl extends ServiceImpl<StockInfoMapper, StockInfo
     @Resource
     private  StockInfoMapper stockInfoMapper;
 
-    public  String  getTableNameByCode(String code){
-        ExcludeEmptyQueryWrapper<StockInfo> stockQuery = new ExcludeEmptyQueryWrapper<>();
-        stockQuery.eq("deleted",0);
-        stockQuery.eq("code",code);
-        StockInfo stockInfo = stockInfoMapper.selectOne(stockQuery);
-        String  table_name = stockInfo.getTsCode().replace(".","_");
-        return table_name;
-    }
+//    public  String  getTableNameByCode(String code){
+//        ExcludeEmptyQueryWrapper<StockInfo> stockQuery = new ExcludeEmptyQueryWrapper<>();
+//        stockQuery.eq("deleted",0);
+//        stockQuery.eq("code",code);
+//        StockInfo stockInfo = stockInfoMapper.selectOne(stockQuery);
+//        String  table_name = stockInfo.getTsCode().replace(".","_");
+//        return table_name;
+//    }
 
     /**getOneByCode */
     public  StockInfo  getOneByCode(String code){

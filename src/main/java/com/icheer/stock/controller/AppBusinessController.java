@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import java.util.Collections;
 import com.icheer.stock.system.stockInfo.entity.StockInfo;
 import com.icheer.stock.system.stockInfo.service.StockInfoService;
+import com.icheer.stock.system.tradeData.entity.StockSimilar;
 import com.icheer.stock.system.tradeData.entity.TradeData;
 import com.icheer.stock.system.tradeData.service.TradeDataService;
 import com.icheer.stock.system.user.entity.WxUser;
@@ -201,7 +202,7 @@ public class AppBusinessController  extends BaseController {
 //        List<Double>  cp_close_ls= tradeDataService.getKeyList(stockMap.getCode(),"close",30);
         String key = "ma5";
         List<Double>  cp_ls= tradeDataService.getKeyList(stockMap.getCode(),key,30);
-        List <StockInfo> CSI300list=stockInfoService.getCSI300List().subList(0,166);
+        List <StockInfo> CSI300list=stockInfoService.getCSI300List();
         Integer total_ranges = 600;
         Integer window_len   = 30;
         List<Double> k_list = new ArrayList<>();
@@ -229,13 +230,22 @@ public class AppBusinessController  extends BaseController {
             k_list.add(each_k);
             k_code.put(each_k,each.getCode());
             code_id.put(each.getCode(),trade_id);
-            System.out.println(CSI300list.indexOf(each)+" :"+each.getCode());
+        }
+        Collections.sort(k_list,Collections.reverseOrder());
+        List<StockSimilar> similarList = new ArrayList<>();
+        for( double similar:k_list.subList(0,10))
+        {
+            StockSimilar stockSimilar = new StockSimilar();
+            stockSimilar.setSimilar(similar);
+            String code = k_code.get(similar);
+            stockSimilar.setCode(code);
+            stockSimilar.setName(stockInfoService.getOneByCode(code).getName());
+            stockSimilar.setTradeData(tradeDataService.getTradeSinceId(code,code_id.get(code),stockMap.getRange()+20));
+            similarList.add(stockSimilar);
         }
         System.out.println(k_list);
-        Collections.sort(k_list);
-        k_code.get(k_list.get(0));
-        System.out.println(k_list);
-        return new Result(200,"",k_code);
+
+        return new Result(200,"",similarList);
     }
 
     /**

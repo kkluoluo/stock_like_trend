@@ -21,5 +21,8 @@ public interface TradeDataService  extends IService<TradeData> {
     /**倒序 获取字段key 列表 */
     public List<String> listStringByKey(String code, String key ,Integer range);
 
+    /**获取getTradeSinceId列表 */
+    public List<TradeData> getTradeSinceId(String code,  Integer id, Integer range);
+
 
 }

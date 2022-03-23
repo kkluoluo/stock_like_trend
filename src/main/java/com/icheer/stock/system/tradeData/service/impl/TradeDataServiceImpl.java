@@ -36,32 +36,39 @@ public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData
 
     /**倒序 最新 100 条记录 */
     public List<TradeData> listDescByTradeDate(String code, Integer range){
-        ExcludeEmptyQueryWrapper<StockInfo> stockQuery = new ExcludeEmptyQueryWrapper<>();
-        stockQuery.eq("deleted",0);
-        stockQuery.eq("code",code);
-        StockInfo stockInfo = stockInfoMapper.selectOne(stockQuery);
-        String  table_name = stockInfo.getTsCode().replace(".","_");
-        return tradeDataMapper.listDescByTradeDate(table_name,range);
+
+        return tradeDataMapper.listDescByTradeDate(tableName_code(code),range);
     }
 
     /**倒序 获取字段key 列表 */
     public List<Double> getKeyList(String code, String key ,Integer range){
-        ExcludeEmptyQueryWrapper<StockInfo> stockQuery = new ExcludeEmptyQueryWrapper<>();
-        stockQuery.eq("deleted",0);
-        stockQuery.eq("code",code);
-        StockInfo stockInfo = stockInfoMapper.selectOne(stockQuery);
-        String  table_name = stockInfo.getTsCode().replace(".","_");
+
+        String  table_name = tableName_code(code);
         return tradeDataMapper.getKeyList(table_name,key,range);
     }
 
     /**倒序 获取字段key 列表 */
     public List<String> listStringByKey(String code, String key ,Integer range){
+
+        String  table_name = tableName_code(code);
+        return tradeDataMapper.getStringKeyList(table_name,key,range);
+    }
+
+    /**获取getTradeSinceId列表 */
+    public List<TradeData> getTradeSinceId(String code,  Integer id, Integer range){
+        String  table_name = tableName_code(code);
+        return tradeDataMapper.getTradeSinceId(table_name,id,range);
+
+    }
+
+    String tableName_code(String code)
+    {
         ExcludeEmptyQueryWrapper<StockInfo> stockQuery = new ExcludeEmptyQueryWrapper<>();
         stockQuery.eq("deleted",0);
         stockQuery.eq("code",code);
         StockInfo stockInfo = stockInfoMapper.selectOne(stockQuery);
         String  table_name = stockInfo.getTsCode().replace(".","_");
-        return tradeDataMapper.getStringKeyList(table_name,key,range);
+        return table_name;
     }
 }
 

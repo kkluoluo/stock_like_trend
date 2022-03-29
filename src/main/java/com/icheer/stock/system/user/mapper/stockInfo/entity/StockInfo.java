@@ -9,6 +9,7 @@ import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * 个股信息
@@ -18,8 +19,8 @@ import java.time.LocalDate;
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-@TableName("Astock_list")
-@ApiModel(value ="Astock_list",description = "个股信息表")
+@TableName("a_shares")
+@ApiModel(value ="a_shares",description = "个股信息表")
 public class StockInfo implements Serializable {
     @TableId(value = "id", type = IdType.AUTO)
     private int id;
@@ -30,23 +31,25 @@ public class StockInfo implements Serializable {
     /** 股票简称*/
     private String name;
     /** 总股本*/
-    private String totalStocks;
+    private String totalShare;
     /** 流通股*/
-    private String floatStocks;
+    private String floatShare;
     /**所属行业 */
     private String industry;
     /** 上市日期*/
     private LocalDate listDate;
     /** 总市值*/
-    private String totalCapitalization;
+    private String totalMv;
     /** 流通市值*/
-    private String floatCapitalization;
+    private String circMv;
     /** 板块*/
-    private String plate;
+    private String market;
     /** 沪深300权重股标志位*/
     private String csi300Flag;
     /** 沪深300权重股--权重*/
     private double csi300Weight;
     /** 删除标志位*/
     private String deleted;
+    /** 更新时间*/
+    private LocalDateTime updateTime;
 }

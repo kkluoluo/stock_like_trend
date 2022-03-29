@@ -67,7 +67,7 @@ public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData
         stockQuery.eq("deleted",0);
         stockQuery.eq("code",code);
         StockInfo stockInfo = stockInfoMapper.selectOne(stockQuery);
-        String  table_name = stockInfo.getTsCode().replace(".","_");
+        String  table_name = stockInfo.getTsCode().replace(".","_").toLowerCase();
         return table_name;
     }
 }

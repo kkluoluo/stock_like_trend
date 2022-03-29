@@ -9,8 +9,11 @@ import com.icheer.stock.system.user.entity.WxUser;
 import com.icheer.stock.system.user.mapper.UserMapper;
 import com.icheer.stock.system.user.service.UserService;
 import com.icheer.stock.system.user.service.WxLoginService;
+
+
 import com.icheer.stock.util.BeanUtils;
 import com.icheer.stock.util.BusinessException;
+import com.icheer.stock.util.HttpUtils;
 import com.icheer.stock.util.JSONUtil;
 import org.apache.shiro.authc.AuthenticationException;
 import org.slf4j.Logger;
@@ -22,7 +25,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import com.icheer.stock.util.HttpUtils;
+
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -161,7 +164,7 @@ public class WxLoginServiceImpl extends ServiceImpl<UserMapper, User> implements
             if(redisToken != null) {
                 //返回并更新失效时间
                 wxUserBack.setToken(redisToken);
-                jwtConfig.updateTokenExpireTime(wxUser.getUserId().toString());
+                jwtConfig.updateTokenExpireTime(String.valueOf(wxUser.getUserId()));
             } else {
                 String token = jwtConfig.createTokenByWxUser(wxUser);
                 wxUserBack.setToken(token);
@@ -218,7 +221,7 @@ public class WxLoginServiceImpl extends ServiceImpl<UserMapper, User> implements
         if(redisToken != null) {
             //返回并更新失效时间
             wxUserBack.setToken(redisToken);
-            jwtConfig.updateTokenExpireTime(wxUser.getUserId().toString());
+            jwtConfig.updateTokenExpireTime(String.valueOf(wxUser.getUserId()));
         } else {
             String token = jwtConfig.createTokenByWxUser(wxUser);
             wxUserBack.setToken(token);

@@ -1,28 +1,37 @@
-package com.icheer.stock.framework.jwt;
+package com.icheer.stock.framework.interceptor;
 
-import com.icheer.stock.util.Result;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.shiro.authc.AuthenticationException;
+
+import com.icheer.stock.framework.jwt.JwtConfig;
+import com.icheer.stock.framework.jwt.JwtToken;
+import com.icheer.stock.system.user.service.UserService;
 import org.apache.shiro.web.filter.authc.BasicHttpAuthenticationFilter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import javax.annotation.Resource;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- *
- * JWT核心过滤器配置
- * 所有的请求都会先经过Filter，所以我们继承官方的BasicHttpAuthenticationFilter，并且重写鉴权的方法。
- * 执行流程 preHandle->isAccessAllowed->isLoginAttempt->executeLogin
- */
+*
+* JWT核心过滤器配置
+* 所有的请求都会先经过Filter，所以我们继承官方的BasicHttpAuthenticationFilter，并且重写鉴权的方法。
+* 执行流程 preHandle->isAccessAllowed->isLoginAttempt->executeLogin
+*/
 
-@Slf4j
-@Component
-public class JwtFilter extends BasicHttpAuthenticationFilter {
+public class UserInterceptor extends BasicHttpAuthenticationFilter {
+
+    @Resource
+    private JwtConfig jwtConfig;
+
+    @Autowired
+    private UserService userService;
 
     /**
      * 判断用户是否想要进行 需要验证的操作
@@ -30,9 +39,9 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
      */
     @Override
     protected boolean isLoginAttempt(ServletRequest request, ServletResponse response) {
-        String auth = getAuthzHeader(request);
-        return auth != null && !auth.equals("");
+        return !StringUtils.isEmpty(getAuthzHeader(request));
     }
+
     /**
      * 此方法调用登陆，验证逻辑
      */
@@ -40,25 +49,17 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
     protected boolean isAccessAllowed(ServletRequest request, ServletResponse response, Object mappedValue) {
         if (isLoginAttempt(request, response)) {
             JwtToken token = new JwtToken(getAuthzHeader(request));
-
-            try{
-                getSubject(request, response).login(token);
-                System.out.println(getAuthzHeader(request));
-                return   true;
-            }catch (Exception e )
-            {
-                return false;
-            }
-        }else if (((HttpServletRequest) request).getHeader("Authorization") == null)
-        {
-//            throw new AuthenticationException("user account not exits , please check your token");
-           return false;
+            getSubject(request, response).login(token);
         }
         return true;
-
-
-
     }
+    @Override
+    protected boolean onAccessDenied(ServletRequest request, ServletResponse response) throws Exception {
+        //TODO
+        System.out.println("onAccessDenied------------------------");
+        return false;
+    }
+
     /**
      * 提供跨域支持
      */
@@ -76,4 +77,6 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
         }
         return super.preHandle(request, response);
     }
+
+
 }

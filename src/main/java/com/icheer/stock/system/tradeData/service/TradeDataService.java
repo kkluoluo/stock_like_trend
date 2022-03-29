@@ -1,9 +1,7 @@
 package com.icheer.stock.system.tradeData.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.icheer.stock.system.stockInfo.entity.StockInfo;
 import com.icheer.stock.system.tradeData.entity.TradeData;
-import org.springframework.data.relational.core.sql.In;
 
 import java.util.List;
 

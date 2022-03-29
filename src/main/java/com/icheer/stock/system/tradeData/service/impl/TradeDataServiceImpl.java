@@ -2,8 +2,8 @@ package com.icheer.stock.system.tradeData.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
-import com.icheer.stock.system.stockInfo.entity.StockInfo;
-import com.icheer.stock.system.stockInfo.mapper.StockInfoMapper;
+import com.icheer.stock.system.user.mapper.stockInfo.entity.StockInfo;
+import com.icheer.stock.system.user.mapper.stockInfo.mapper.StockInfoMapper;
 import com.icheer.stock.system.tradeData.entity.TradeData;
 import com.icheer.stock.system.tradeData.mapper.TradeDataMapper;
 import com.icheer.stock.system.tradeData.service.TradeDataService;
@@ -17,7 +17,7 @@ import java.util.List;
 
 @Service
 public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData> implements TradeDataService {
-    private static final Logger log = LoggerFactory.getLogger(com.icheer.stock.system.tradeData.service.impl.TradeDataServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(TradeDataServiceImpl.class);
 
     @Autowired
     private  TradeDataMapper tradeDataMapper;

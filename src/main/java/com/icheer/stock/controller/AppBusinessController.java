@@ -1,18 +1,19 @@
 package com.icheer.stock.controller;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import java.util.Collections;
-import com.icheer.stock.system.stockInfo.entity.StockInfo;
-import com.icheer.stock.system.stockInfo.service.StockInfoService;
+import com.icheer.stock.system.user.mapper.stockInfo.entity.StockInfo;
+import com.icheer.stock.system.user.mapper.stockInfo.service.StockInfoService;
 import com.icheer.stock.system.tradeData.entity.StockSimilar;
 import com.icheer.stock.system.tradeData.entity.TradeData;
 import com.icheer.stock.system.tradeData.service.TradeDataService;
 import com.icheer.stock.system.user.entity.WxUser;
 import com.icheer.stock.system.user.service.UserService;
 import com.icheer.stock.system.user.service.WxLoginService;
+
+
+import com.icheer.stock.system.userHistory.service.UserHistoryService;
 import com.icheer.stock.util.*;
+import lombok.extern.java.Log;
+import org.apache.shiro.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.relational.core.sql.In;
@@ -22,19 +23,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.function.DoubleToIntFunction;
+import java.util.function.ToIntFunction;
 
 @Controller
 @RequestMapping("/api")
-public class AppBusinessController  extends BaseController {
+public class AppBusinessController extends BaseController{
 
     private static Logger logger = LoggerFactory.getLogger(AppBusinessController.class);
-
-
 
 
 
@@ -45,11 +44,31 @@ public class AppBusinessController  extends BaseController {
     private WxLoginService wxLoginService;
 
     @Resource
+    private ServerVersion serverVersion;
+
+    @Resource
     private StockInfoService stockInfoService;
 
     @Resource
     private TradeDataService tradeDataService;
 
+    @Resource
+    private UserHistoryService userHistoryService;
+
+
+
+
+    /**
+     * version
+     */
+    @RequestMapping("/version")
+    @ResponseBody
+    public Result getVersion(){
+        Map<String ,String> result = new HashMap<>();
+        result.put("stock-backend",serverVersion.getVersion());
+        result.put("Time",LocalDateTime.now().toString());
+        return new Result(200,"SUCCESS",result);
+    }
 
     /**
      * 小程序登录 loginName昵称 userName修改后的名称
@@ -59,7 +78,27 @@ public class AppBusinessController  extends BaseController {
     @RequestMapping("/loginByMini")
     @ResponseBody
     public Result loginByMini(@RequestBody WxUser wxLoginInfo) {
-        return new Result(200,"","");
+        boolean result = false;
+        WxUser wxLoginUserToken = new WxUser();
+        try{
+            wxLoginUserToken =  wxLoginService.wxUserLogin(wxLoginInfo);
+            result = true;
+        }catch (Exception e){
+            e.printStackTrace();
+        } finally {
+            if(result == true) {
+//                Map<String,String> map = new HashMap<>();
+//                roles = roleService.selectRoleKeys(wxLoginUserToken.getUserId());
+//                wxLoginUserToken.setRoles(roles);
+                wxLoginUserToken.setAvatarUrl(wxLoginUserToken.getAvatar());
+                wxLoginUserToken.setNickName(wxLoginUserToken.getLoginName());
+                return new Result(200,"登录成功",wxLoginUserToken);
+
+
+            } else {
+                return  new Result(200,"登录失败","");
+            }
+        }
     }
 
     @RequestMapping("/getLoginCode")
@@ -76,54 +115,6 @@ public class AppBusinessController  extends BaseController {
 
 
     /**
-     * 获取股票历史数据test
-     */
-    @RequestMapping("/get000001SZ")
-    @ResponseBody
-    public Result getcsi300(PageDomain pageDomain)
-    {
-
-        pageDomain.setPageNum(1);
-        pageDomain.setPageSize(20);
-
-        startPage();
-        String code = "000001";
-
-        List<TradeData> list = tradeDataService.listDescByTradeDate(code,100);
-        return new Result(200,"",getDataTable(list));
-    }
-
-    public static void httpPostForStockList() {
-        String url = "http://api.tushare.pro";
-        Map<String, Object> params = new HashMap<String, Object>(10);
-        params.put("api_name", "stock_basic");
-        ////token，需要申请，上面链接直达
-        params.put("token", "02168cdd92e4b479dcd581b83d0f6f5114afe93cb4d41b214019022e");
-        //请求参数
-        Map paramValue=new HashMap();
-        paramValue.put("list_status","L");
-//        paramValue.put("exchange","SZSE");
-
-        params.put("params", paramValue);
-//        params.put("fields", "ts_code,symbol,name,area,industry,fullname,enname,market,exchange,curr_type,list_status,list_date,delist_date,is_hs");
-        String res = HttpUtils.sendGet(url, JSON.toJSONString(params));
-
-        System.out.println(res);
-        Map result = (Map) JSON.parse(res);
-        Map data = (Map) result.get("data");
-        JSONArray arr = (JSONArray) data.get("fields");
-        JSONArray dataArr = (JSONArray) data.get("items");
-        System.out.println(dataArr);
-//        for (int i = 0; i < dataArr.size(); i++) {
-//            JSONObject obj=dataArr.getJSONObject(i);
-//            Object obj = dataArr.get(i);
-//
-//            System.out.println(obj);
-//        }
-
-    }
-
-    /**
      * 搜索股票数据
      * @param stockMap(code) 通过代码搜索个股
      * @param stockMap(name) 通过名称搜索个股
@@ -133,7 +124,8 @@ public class AppBusinessController  extends BaseController {
     @ResponseBody
     public Result search_stockByCode(@RequestBody StockMap stockMap ){
 
-        startPage();
+        Long userId = (Long) SecurityUtils.getSubject().getSession().getAttribute("userId");
+
         List<StockTradeResult> stockTradeResults = new ArrayList<>();
         if (stockMap.getCode()!=null & stockMap.getCode()!="")
         {
@@ -146,6 +138,7 @@ public class AppBusinessController  extends BaseController {
                 result.setStockInfo(stock);
                 result.setTradeDataList(list);
                 stockTradeResults.add(result);
+                userHistoryService.setSearchHistory(Integer.valueOf(userId.toString()),stock.getCode());
             }
         }else
         {
@@ -153,6 +146,7 @@ public class AppBusinessController  extends BaseController {
             stockQuery.eq("deleted",0);
             stockQuery.like("name",stockMap.getName());
             List<StockInfo> stocks= stockInfoService.list(stockQuery);
+            userHistoryService.setSearchNameHistory(Integer.valueOf(userId.toString()),stockMap.getName());
             if (stocks != null)
             {
                 for(StockInfo one:stocks)
@@ -177,13 +171,12 @@ public class AppBusinessController  extends BaseController {
     @RequestMapping("/search_stockByName")
     @ResponseBody
     public Result search_stockByName(@RequestBody StockMap stockMap){
-
-        startPage();
         ExcludeEmptyQueryWrapper<StockInfo> stockQuery = new ExcludeEmptyQueryWrapper<>();
         stockQuery.eq("deleted",0);
         stockQuery.like("name",stockMap.getName());
         List<StockInfo> stocks= stockInfoService.list(stockQuery);
-        return  new Result(200,"success",getDataTable(stocks));
+        TableDataInfo tableDataInfo = new TableDataInfo(stocks,stocks.size());
+        return  new Result(200,"success",tableDataInfo);
 
     }
 
@@ -195,13 +188,14 @@ public class AppBusinessController  extends BaseController {
      */
     @RequestMapping("/stock_analysis")
     @ResponseBody
-    public Result stock_analysis(@RequestBody StockMap stockMap)
+    public Result stock_analysis(@RequestBody StockMap stockMap) throws IOException
     {
+        Long userId = (Long) SecurityUtils.getSubject().getSession().getAttribute("userId");
         /** 对比对象的30交易数据*/
 //        List<Double>  cp_open_ls = tradeDataService.getKeyList(stockMap.getCode(),"open",30);
 //        List<Double>  cp_close_ls= tradeDataService.getKeyList(stockMap.getCode(),"close",30);
         String key = "ma5";
-        List<Double>  cp_ls= tradeDataService.getKeyList(stockMap.getCode(),key,30);
+        List<Double>  cp_ls= tradeDataService.getKeyList(stockMap.getCode(),key,stockMap.getRange());
         List <StockInfo> CSI300list=stockInfoService.getCSI300List();
         Integer total_ranges = 600;
         Integer window_len   = 30;
@@ -244,7 +238,7 @@ public class AppBusinessController  extends BaseController {
             similarList.add(stockSimilar);
         }
         System.out.println(k_list);
-
+        userHistoryService.setSearchHistory(Integer.valueOf(userId.toString()),stockMap.getCode());
         return new Result(200,"",similarList);
     }
 
@@ -296,5 +290,38 @@ public class AppBusinessController  extends BaseController {
             return null;
         }
     }
+    /** 皮尔逊相关度系数 int计算，但是速度没有优化太多and结果会被0.0*/
+    public static Double getPearsonBydim2(List<Double> ratingOne, List<Double> ratingTwo) {
+        if(ratingOne.size() != ratingTwo.size()) {//两个变量的观测值是成对的，每对观测值之间相互独立。
+            return null;
+        }
+        double sim = 0D;//最后的皮尔逊相关度系数
+        int commonItemsLen = ratingOne.size();//操作数的个数
+        int oneSum = 0;//第一个相关数的和
+        int twoSum = 0;//第二个相关数的和
+        for(int i=0; i<commonItemsLen; i++) {
+            oneSum += ratingOne.get(i)*100;
+            twoSum += ratingTwo.get(i)*100;
+        }
+        int oneAvg = oneSum/commonItemsLen;//第一个相关数的平均值
+        int twoAvg = twoSum/commonItemsLen;//第二个相关数的平均值
+        int sonSum = 0;
+        int tempOne = 0;
+        int tempTwo = 0;
+        for(int i=0; i<commonItemsLen; i++) {
+            sonSum += (ratingOne.get(i)*100-oneAvg)*(ratingTwo.get(i)-twoAvg);
+            tempOne += Math.pow((ratingOne.get(i)*100-oneAvg), 2);
+            tempTwo += Math.pow((ratingTwo.get(i)*100-twoAvg), 2);
+        }
+        double fatherSum = Math.sqrt(tempOne * tempTwo);
+        sim = (fatherSum == 0) ? 1 : sonSum / fatherSum;
+        return sim;
+    }
+
+
+
+
+
+
 
 }

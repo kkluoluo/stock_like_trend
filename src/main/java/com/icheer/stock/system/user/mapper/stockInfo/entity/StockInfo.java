@@ -1,4 +1,4 @@
-package com.icheer.stock.system.stockInfo.entity;
+package com.icheer.stock.system.user.mapper.stockInfo.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -22,7 +22,7 @@ import java.time.LocalDate;
 @ApiModel(value ="Astock_list",description = "个股信息表")
 public class StockInfo implements Serializable {
     @TableId(value = "id", type = IdType.AUTO)
-    private long id;
+    private int id;
     /** 股票代码*/
     private String code;
     /** 股票代码*/

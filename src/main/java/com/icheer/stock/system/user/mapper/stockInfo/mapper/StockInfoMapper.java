@@ -1,8 +1,8 @@
-package com.icheer.stock.system.stockInfo.mapper;
+package com.icheer.stock.system.user.mapper.stockInfo.mapper;
 
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.icheer.stock.system.stockInfo.entity.StockInfo;
+import com.icheer.stock.system.user.mapper.stockInfo.entity.StockInfo;
 import org.apache.ibatis.annotations.Mapper;
 
 

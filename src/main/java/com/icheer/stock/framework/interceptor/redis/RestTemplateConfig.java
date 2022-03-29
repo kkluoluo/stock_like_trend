@@ -1,4 +1,4 @@
-package com.icheer.stock.framework.redis;
+package com.icheer.stock.framework.interceptor.redis;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

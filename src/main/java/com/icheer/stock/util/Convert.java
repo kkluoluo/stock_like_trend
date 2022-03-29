@@ -6,7 +6,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.text.NumberFormat;
 import java.util.Set;
-import com.icheer.stock.util.StringUtils;
+
 /**
  * 类型转换器
  *

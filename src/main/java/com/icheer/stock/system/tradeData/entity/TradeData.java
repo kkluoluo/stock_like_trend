@@ -13,7 +13,7 @@ public class TradeData implements Serializable {
 
     @ApiModelProperty(value = "indexID")
     @TableId(value = "id", type = IdType.AUTO)
-    private Long id;
+    private int id;
     private String      tsCode;
     private LocalDate   tradeDate;
     private  double open;

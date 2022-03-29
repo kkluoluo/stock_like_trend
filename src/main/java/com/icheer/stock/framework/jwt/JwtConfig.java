@@ -1,12 +1,13 @@
 package com.icheer.stock.framework.jwt;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.icheer.stock.system.user.entity.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.JWTVerifier;
-import com.auth0.jwt.algorithms.Algorithm;
+
 import javax.annotation.Resource;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;

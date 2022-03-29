@@ -1,8 +1,9 @@
 package com.icheer.stock.util;
 
-import java.util.List;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+
+import java.util.List;
 /**
  * com.eiker.common.utils
  *

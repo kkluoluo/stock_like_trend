@@ -1,6 +1,6 @@
 package com.icheer.stock.util;
 
-import com.icheer.stock.system.stockInfo.entity.StockInfo;
+import com.icheer.stock.system.user.mapper.stockInfo.entity.StockInfo;
 import com.icheer.stock.system.tradeData.entity.TradeData;
 import lombok.Data;
 

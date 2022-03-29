@@ -1,7 +1,5 @@
 package com.icheer.stock.util;
 
-import com.icheer.stock.util.StringUtils;
-
 /**
  * 字符串格式化
  *

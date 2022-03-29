@@ -1,9 +1,11 @@
 package com.icheer.stock.util;
+
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.icheer.stock.util.AjaxResult.Type;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
+
 import java.beans.PropertyEditorSupport;
 import java.util.Date;
 import java.util.List;

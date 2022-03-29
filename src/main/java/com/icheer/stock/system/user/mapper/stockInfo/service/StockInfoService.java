@@ -1,7 +1,7 @@
-package com.icheer.stock.system.stockInfo.service;
+package com.icheer.stock.system.user.mapper.stockInfo.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.icheer.stock.system.stockInfo.entity.StockInfo;
+import com.icheer.stock.system.user.mapper.stockInfo.entity.StockInfo;
 
 import java.util.List;
 

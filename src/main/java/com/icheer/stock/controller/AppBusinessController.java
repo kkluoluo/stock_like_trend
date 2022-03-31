@@ -125,7 +125,6 @@ public class AppBusinessController extends BaseController{
     public Result search_stockByCode(@RequestBody StockMap stockMap ){
 
         Long userId = (Long) SecurityUtils.getSubject().getSession().getAttribute("userId");
-
         List<StockTradeResult> stockTradeResults = new ArrayList<>();
         if (stockMap.getCode()!=null & stockMap.getCode()!="")
         {
@@ -133,7 +132,7 @@ public class AppBusinessController extends BaseController{
             /**及其100日数据**/
             if(stock != null)
             {
-                List<TradeData> list    = tradeDataService.listDescByTradeDate("000001",100);
+                List<TradeData> list    = tradeDataService.listDescByTradeDate(stock.getCode(),100);
                 StockTradeResult result = new StockTradeResult();
                 result.setStockInfo(stock);
                 result.setTradeDataList(list);
@@ -151,7 +150,7 @@ public class AppBusinessController extends BaseController{
             {
                 for(StockInfo one:stocks)
                 {
-                    List<TradeData> list    = tradeDataService.listDescByTradeDate("000001",100);
+                    List<TradeData> list    = tradeDataService.listDescByTradeDate(one.getCode(),100);
                     StockTradeResult result = new StockTradeResult();
                     result.setStockInfo(one);
                     result.setTradeDataList(list);
@@ -190,10 +189,9 @@ public class AppBusinessController extends BaseController{
     @ResponseBody
     public Result stock_analysis(@RequestBody StockMap stockMap) throws IOException
     {
-        Long userId = (Long) SecurityUtils.getSubject().getSession().getAttribute("userId");
+//        Long userId = (Long) SecurityUtils.getSubject().getSession().getAttribute("userId");
+//        userHistoryService.setSearchHistory(Integer.valueOf(userId.toString()),stockMap.getCode());
         /** 对比对象的30交易数据*/
-//        List<Double>  cp_open_ls = tradeDataService.getKeyList(stockMap.getCode(),"open",30);
-//        List<Double>  cp_close_ls= tradeDataService.getKeyList(stockMap.getCode(),"close",30);
         String key = "ma5";
         List<Double>  cp_ls= tradeDataService.getKeyList(stockMap.getCode(),key,stockMap.getRange());
         List <StockInfo> CSI300list=stockInfoService.getCSI300List();
@@ -210,7 +208,7 @@ public class AppBusinessController extends BaseController{
             List<String>  trades_ids = tradeDataService.listStringByKey(each.getCode(),"id",total_ranges);
             if (each_trades.size()<total_ranges) total_ranges = each_trades.size();
 
-            for(Integer i =0;i<total_ranges;i=i+window_len)
+            for(Integer i =10;i<total_ranges;i=i+window_len)
             {
                 if(i+stockMap.getRange()>=total_ranges)
                 {break;}
@@ -234,11 +232,12 @@ public class AppBusinessController extends BaseController{
             String code = k_code.get(similar);
             stockSimilar.setCode(code);
             stockSimilar.setName(stockInfoService.getOneByCode(code).getName());
-            stockSimilar.setTradeData(tradeDataService.getTradeSinceId(code,code_id.get(code),stockMap.getRange()+20));
+            Integer indexId = code_id.get(code) - stockMap.getRange();
+            stockSimilar.setTradeData(tradeDataService.getTradeSinceId(code,indexId,stockMap.getRange()+20));
             similarList.add(stockSimilar);
         }
         System.out.println(k_list);
-        userHistoryService.setSearchHistory(Integer.valueOf(userId.toString()),stockMap.getCode());
+
         return new Result(200,"",similarList);
     }
 
@@ -287,7 +286,7 @@ public class AppBusinessController extends BaseController{
             sim = (den == 0) ? 1 : num / den;
             return sim;
         } catch (Exception e) {
-            return null;
+            return 0.00;
         }
     }
     /** 皮尔逊相关度系数 int计算，但是速度没有优化太多and结果会被0.0*/

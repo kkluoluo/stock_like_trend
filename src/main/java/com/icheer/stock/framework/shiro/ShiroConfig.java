@@ -54,7 +54,8 @@ public class ShiroConfig {
         //登录相关api不需要被过滤器拦截
         filterRuleMap.put("/api/loginByMini","anon");
         filterRuleMap.put("/api/error","anon");
-        filterRuleMap.put("/api/getLoginCode","anon");
+        filterRuleMap.put("/test/stock_analysis","anon");
+        filterRuleMap.put("/api/stock_analysis","anon");
 //        filterRuleMap.put("/api/*","authc");
 //        filterRuleMap.put("/api/stock_analysis","authc");
         //所有请求通过JWT Filter

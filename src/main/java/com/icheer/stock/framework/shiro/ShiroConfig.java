@@ -56,6 +56,8 @@ public class ShiroConfig {
         filterRuleMap.put("/api/error","anon");
         filterRuleMap.put("/test/stock_analysis","anon");
         filterRuleMap.put("/api/stock_analysis","anon");
+        //测速k线相似api
+        filterRuleMap.put("/test/getSimilarRes","anon");
 //        filterRuleMap.put("/api/*","authc");
 //        filterRuleMap.put("/api/stock_analysis","authc");
         //所有请求通过JWT Filter

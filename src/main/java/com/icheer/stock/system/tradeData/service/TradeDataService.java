@@ -22,5 +22,7 @@ public interface TradeDataService  extends IService<TradeData> {
     /**获取getTradeSinceId列表 */
     public List<TradeData> getTradeSinceId(String code,  Integer id, Integer range);
 
+    /**get listData By table_name */
+    public List<TradeData> listData(String tableName);
 
 }

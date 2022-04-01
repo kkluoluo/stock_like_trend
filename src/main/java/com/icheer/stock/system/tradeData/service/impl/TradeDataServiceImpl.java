@@ -61,6 +61,11 @@ public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData
 
     }
 
+    @Override
+    public List<TradeData> listData(String tableName) {
+        return tradeDataMapper.list(tableName);
+    }
+
     String tableName_code(String code)
     {
         ExcludeEmptyQueryWrapper<StockInfo> stockQuery = new ExcludeEmptyQueryWrapper<>();

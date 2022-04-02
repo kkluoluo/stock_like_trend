@@ -23,6 +23,9 @@ public class ProcessedTableProvider {
 
         }}.toString();
     }
+    public String listDescById(String table_name){
+        return "select * from "+ table_name + " order by id desc ";
+    }
 
 //    获取沪深300code list
     public String listHS300(){

@@ -18,4 +18,6 @@ public interface ProcessedTableMapper extends BaseMapper<ProcessedTable> {
     @Select("select ts_code from a_shares where csi300_flag = 1")
     public ArrayList<String> listHS300();
 
+    @SelectProvider(type= ProcessedTableProvider.class,method="listDescById")
+    public ArrayList<ProcessedTable> listDescById(String table_name);
 }

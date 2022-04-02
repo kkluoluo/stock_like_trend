@@ -10,4 +10,6 @@ public interface ProcessedTableService extends IService<ProcessedTable> {
     public ArrayList<ProcessedTable> list(String table_name);
 
     public ArrayList<String> listHS300();
+
+    public ArrayList<ProcessedTable> listDescById(String table_name);
 }

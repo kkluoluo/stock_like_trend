@@ -66,7 +66,7 @@ public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData
         return tradeDataMapper.list(tableName);
     }
 
-    String tableName_code(String code)
+    public String tableName_code(String code)
     {
         ExcludeEmptyQueryWrapper<StockInfo> stockQuery = new ExcludeEmptyQueryWrapper<>();
         stockQuery.eq("deleted",0);

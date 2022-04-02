@@ -24,4 +24,9 @@ public class ProcessedTableServiceImpl extends ServiceImpl<ProcessedTableMapper,
     public ArrayList<String> listHS300() {
         return processedTableMapper.listHS300();
     }
+
+    @Override
+    public ArrayList<ProcessedTable> listDescById(String table_name) {
+        return processedTableMapper.listDescById(table_name);
+    }
 }

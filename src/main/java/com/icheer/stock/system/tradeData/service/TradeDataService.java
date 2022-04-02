@@ -25,4 +25,5 @@ public interface TradeDataService  extends IService<TradeData> {
     /**get listData By table_name */
     public List<TradeData> listData(String tableName);
 
+    public String tableName_code(String code);
 }

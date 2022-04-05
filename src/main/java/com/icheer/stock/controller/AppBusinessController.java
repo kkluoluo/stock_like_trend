@@ -189,8 +189,8 @@ public class AppBusinessController extends BaseController{
     @ResponseBody
     public Result stock_analysis(@RequestBody StockMap stockMap) throws IOException
     {
-//        Long userId = (Long) SecurityUtils.getSubject().getSession().getAttribute("userId");
-//        userHistoryService.setSearchHistory(Integer.valueOf(userId.toString()),stockMap.getCode());
+        Long userId = (Long) SecurityUtils.getSubject().getSession().getAttribute("userId");
+        userHistoryService.setSearchHistory(Integer.valueOf(userId.toString()),stockMap.getCode());
         /** 对比对象的30交易数据*/
         String key = "ma5";
         List<Double>  cp_ls= tradeDataService.getKeyList(stockMap.getCode(),key,stockMap.getRange());

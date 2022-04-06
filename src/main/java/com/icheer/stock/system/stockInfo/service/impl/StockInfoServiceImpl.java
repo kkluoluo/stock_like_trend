@@ -1,10 +1,10 @@
-package com.icheer.stock.system.user.mapper.stockInfo.service.impl;
+package com.icheer.stock.system.stockInfo.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
-import com.icheer.stock.system.user.mapper.stockInfo.entity.StockInfo;
-import com.icheer.stock.system.user.mapper.stockInfo.mapper.StockInfoMapper;
-import com.icheer.stock.system.user.mapper.stockInfo.service.StockInfoService;
+import com.icheer.stock.system.stockInfo.entity.StockInfo;
+import com.icheer.stock.system.stockInfo.mapper.StockInfoMapper;
+import com.icheer.stock.system.stockInfo.service.StockInfoService;
 import com.icheer.stock.util.ExcludeEmptyQueryWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,14 +21,13 @@ public class StockInfoServiceImpl extends ServiceImpl<StockInfoMapper, StockInfo
     @Resource
     private  StockInfoMapper stockInfoMapper;
 
-//    public  String  getTableNameByCode(String code){
-//        ExcludeEmptyQueryWrapper<StockInfo> stockQuery = new ExcludeEmptyQueryWrapper<>();
-//        stockQuery.eq("deleted",0);
-//        stockQuery.eq("code",code);
-//        StockInfo stockInfo = stockInfoMapper.selectOne(stockQuery);
-//        String  table_name = stockInfo.getTsCode().replace(".","_");
-//        return table_name;
-//    }
+    /** name模糊查找 */
+    public  List<StockInfo>  listByName(String name){
+        ExcludeEmptyQueryWrapper<StockInfo> stockQuery = new ExcludeEmptyQueryWrapper<>();
+        stockQuery.eq("deleted",0);
+        stockQuery.like("name",name);
+        return  stockInfoMapper.selectList(stockQuery);
+    }
 
     /**getOneByCode */
     public  StockInfo  getOneByCode(String code){

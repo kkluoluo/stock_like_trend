@@ -1,15 +1,15 @@
-package com.icheer.stock.system.user.mapper.stockInfo.service;
+package com.icheer.stock.system.stockInfo.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.icheer.stock.system.user.mapper.stockInfo.entity.StockInfo;
+import com.icheer.stock.system.stockInfo.entity.StockInfo;
 
 import java.util.List;
 
 public interface StockInfoService extends IService<StockInfo> {
 
 
-    /**获取表名 */
-//    public  String  getTableNameByCode(String code);
+    /** name模糊查找 */
+    public  List<StockInfo>  listByName(String name);
 
     /**getOneByCode */
     public  StockInfo  getOneByCode(String code);

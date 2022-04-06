@@ -1,4 +1,4 @@
-package com.icheer.stock.system.user.mapper.stockInfo.entity;
+package com.icheer.stock.system.stockInfo.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;

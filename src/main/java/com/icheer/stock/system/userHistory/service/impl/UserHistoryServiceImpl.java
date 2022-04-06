@@ -2,7 +2,7 @@ package com.icheer.stock.system.userHistory.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
-import com.icheer.stock.system.user.mapper.stockInfo.service.StockInfoService;
+import com.icheer.stock.system.stockInfo.service.StockInfoService;
 import com.icheer.stock.system.user.mapper.UserMapper;
 import com.icheer.stock.system.userHistory.entity.UserHistory;
 import com.icheer.stock.system.userHistory.mapper.UserHistoryMapper;

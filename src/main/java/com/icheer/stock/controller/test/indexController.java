@@ -2,16 +2,18 @@ package com.icheer.stock.controller.test;
 
 import com.icheer.stock.controller.test.test.entity.Test;
 import com.icheer.stock.controller.test.test.service.TestService;
+import com.icheer.stock.system.stockInfo.mapper.StockInfoMapper;
 import com.icheer.stock.system.tradeData.entity.StockSimilar;
 import com.icheer.stock.system.tradeData.service.TradeDataService;
-import com.icheer.stock.system.user.mapper.stockInfo.entity.StockInfo;
-import com.icheer.stock.system.user.mapper.stockInfo.service.StockInfoService;
+import com.icheer.stock.system.stockInfo.entity.StockInfo;
+import com.icheer.stock.system.stockInfo.service.StockInfoService;
 import com.icheer.stock.system.user.service.UserService;
 import com.icheer.stock.system.user.service.WxLoginService;
 import com.icheer.stock.util.Result;
 import com.icheer.stock.util.ServerVersion;
 import com.icheer.stock.util.StockMap;
-import org.springframework.data.relational.core.sql.In;
+import com.icheer.stock.util.StockTradeResult;
+import org.apache.shiro.SecurityUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,6 +46,38 @@ public class indexController {
     @Resource
     private TestService testService;
 
+    @Resource
+    private StockInfoMapper stockInfoMapper;
+
+
+    /**
+     * 个股相似走势分析
+     * @param  stockMap(code)  比较对象代码
+     * @param  stockMap(range) 比较时间范围
+     * @return
+     */
+    @RequestMapping("/stock_new")
+    @ResponseBody
+    public Result stock_analysis2(@RequestBody StockMap stockMap) throws IOException
+    {
+      List<StockSimilar>  list=  tradeDataService.getSimilarAnalysis(stockMap.getCode(),stockMap.getRange(),"ma5");
+      return  new Result(200,"",list);
+    }
+
+
+    @RequestMapping("/stock_test")
+    @ResponseBody
+    public Result stock_test(@RequestBody StockMap stockMap) throws IOException
+    {
+
+        /**分类搜索**/
+        List<StockTradeResult> stockTradeResults = tradeDataService.searchStockTrades(stockMap,Long.valueOf(1));
+        return new Result(200,"success",stockTradeResults);
+
+    }
+
+
+
 
     /**
      * 个股相似走势分析
@@ -55,8 +89,8 @@ public class indexController {
     @ResponseBody
     public Result stock_analysis(@RequestBody StockMap stockMap) throws IOException
     {
-//        Long userId = (Long) SecurityUtils.getSubject().getSession().getAttribute("userId");
-//        userHistoryService.setSearchHistory(Integer.valueOf(userId.toString()),stockMap.getCode());
+
+
         /** 对比对象的30交易数据*/
         String key = "ma5";
         List<Double> cp_ls= tradeDataService.getKeyList(stockMap.getCode(),key,stockMap.getRange());

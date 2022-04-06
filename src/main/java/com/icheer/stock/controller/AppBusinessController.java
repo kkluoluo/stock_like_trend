@@ -83,14 +83,9 @@ public class AppBusinessController extends BaseController{
             e.printStackTrace();
         } finally {
             if(result == true) {
-//                Map<String,String> map = new HashMap<>();
-//                roles = roleService.selectRoleKeys(wxLoginUserToken.getUserId());
-//                wxLoginUserToken.setRoles(roles);
                 wxLoginUserToken.setAvatarUrl(wxLoginUserToken.getAvatar());
                 wxLoginUserToken.setNickName(wxLoginUserToken.getLoginName());
                 return new Result(200,"登录成功",wxLoginUserToken);
-
-
             } else {
                 return  new Result(200,"登录失败","");
             }
@@ -145,4 +140,17 @@ public class AppBusinessController extends BaseController{
         return new Result(200,"",similarList);
     }
 
+    /**
+     * 市场行情-大盘综合指数
+     * @param  stockMap(code)  比较对象代码
+     * @param  stockMap(range) 比较时间范围
+     * @return
+     */
+//    @RequestMapping("/composite_index")
+//    @ResponseBody
+//    public Result composite_index(@RequestBody StockMap stockMap) throws IOException
+//    {
+//
+//
+//
 }

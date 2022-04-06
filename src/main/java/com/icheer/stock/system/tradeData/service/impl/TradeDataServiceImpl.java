@@ -88,6 +88,10 @@ public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData
             }
         }else
         {
+//            ExcludeEmptyQueryWrapper<StockInfo> stockQuery = new ExcludeEmptyQueryWrapper<>();
+//            stockQuery.eq("deleted",0);
+//            stockQuery.like("name",stockMap.getName());
+//            List<StockInfo> stocks= stockInfoMapper.selectList(stockQuery);
             List<StockInfo> stocks= stockInfoMapper.listByName(stockMap.getName());
             userHistoryService.setSearchNameHistory(Integer.valueOf(userId.toString()),stockMap.getName());
             if (stocks != null)

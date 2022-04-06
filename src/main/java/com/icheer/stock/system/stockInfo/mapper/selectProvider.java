@@ -17,6 +17,6 @@ public class selectProvider {
     }
 
     public  String listByName(String name){
-        return "select * from a_shares where name like  " + name +" and deleted = '0'" ;
+        return "select * from a_shares where  deleted ='0' and name like '%" + name+"%' " ;
     }
 }

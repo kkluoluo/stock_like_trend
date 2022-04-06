@@ -72,7 +72,8 @@ public class indexController {
 
         /**分类搜索**/
         List<StockTradeResult> stockTradeResults = tradeDataService.searchStockTrades(stockMap,Long.valueOf(1));
-        return new Result(200,"success",stockTradeResults);
+        stockInfoMapper.listByName(stockMap.getName());
+        return new Result(200,"success",stockInfoMapper.listByName(stockMap.getName()));
 
     }
 

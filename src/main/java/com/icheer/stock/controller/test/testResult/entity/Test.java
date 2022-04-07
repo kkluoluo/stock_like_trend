@@ -1,4 +1,4 @@
-package com.icheer.stock.controller.test.test.entity;
+package com.icheer.stock.controller.test.testResult.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -9,8 +9,8 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
-@TableName("test_mo")
-@ApiModel(value ="test",description = "test表")
+@TableName("test_result")
+@ApiModel(value ="test_result",description = "验证后果表，用户存储结果便于画图")
 public class Test {
 
 

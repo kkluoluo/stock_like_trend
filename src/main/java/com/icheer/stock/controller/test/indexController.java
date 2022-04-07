@@ -1,7 +1,7 @@
 package com.icheer.stock.controller.test;
 
-import com.icheer.stock.controller.test.test.entity.Test;
-import com.icheer.stock.controller.test.test.service.TestService;
+import com.icheer.stock.controller.test.testResult.entity.Test;
+import com.icheer.stock.controller.test.testResult.service.TestService;
 import com.icheer.stock.system.stockInfo.mapper.StockInfoMapper;
 import com.icheer.stock.system.tradeData.entity.StockSimilar;
 import com.icheer.stock.system.tradeData.service.TradeDataService;
@@ -13,8 +13,6 @@ import com.icheer.stock.util.Result;
 import com.icheer.stock.util.ServerVersion;
 import com.icheer.stock.util.StockMap;
 import com.icheer.stock.util.StockTradeResult;
-import org.apache.shiro.SecurityUtils;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -26,16 +24,6 @@ import java.util.*;
 //@Controller
 //@RequestMapping("/test01")
 public class indexController {
-
-
-    @Resource
-    private UserService userService;
-
-    @Resource
-    private WxLoginService wxLoginService;
-
-    @Resource
-    private ServerVersion serverVersion;
 
     @Resource
     private StockInfoService stockInfoService;

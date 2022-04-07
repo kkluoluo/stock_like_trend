@@ -23,8 +23,8 @@ import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.*;
 
-@Controller
-@RequestMapping("/test")
+//@Controller
+//@RequestMapping("/test01")
 public class indexController {
 
 

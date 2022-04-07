@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.ListIterator;
 
 @RestController
-@RequestMapping("/test01")
+@RequestMapping("/test")
 public class KLineSimilarController {
 
     @Resource

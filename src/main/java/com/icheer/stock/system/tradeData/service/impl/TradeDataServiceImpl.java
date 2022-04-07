@@ -33,6 +33,7 @@ public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData
     private UserHistoryService userHistoryService;
 
     /**get list By table_name */
+    @Override
     public List<TradeData> list(String code){
         return tradeDataMapper.list(tableName_code(code));
     }
@@ -44,6 +45,7 @@ public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData
     }
 
     /**倒序 获取字段key 列表 */
+    @Override
     public List<Double> getKeyList(String code, String key ,Integer range){
 
         String  table_name = tableName_code(code);
@@ -51,6 +53,7 @@ public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData
     }
 
     /**倒序 获取字段key 列表 */
+    @Override
     public List<String> listStringByKey(String code, String key ,Integer range){
 
         String  table_name = tableName_code(code);
@@ -58,6 +61,7 @@ public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData
     }
 
     /**获取getTradeSinceId列表 */
+    @Override
     public List<TradeData> getTradeSinceId(String code,  Integer id, Integer range){
         String  table_name = tableName_code(code);
         return tradeDataMapper.getTradeSinceId(table_name,id,range);
@@ -65,6 +69,7 @@ public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData
     }
 
     /**获取StockTradeResult*/
+    @Override
     public StockTradeResult getStockTradeResult(StockInfo stock){
         List<TradeData> list    = tradeDataMapper.listDescByTradeDate(tableName_code(stock.getCode()),100);
         StockTradeResult result = new StockTradeResult();
@@ -74,6 +79,7 @@ public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData
     }
 
     /**搜索BY code or name */
+    @Override
     public List<StockTradeResult> searchStockTrades(StockMap stockMap, Long userId){
 
         List<StockTradeResult> stockTradeResults = new ArrayList<>();
@@ -128,11 +134,16 @@ public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData
         }
         return  stockTradeResults;
     }
-
+    /**获取所以数据正序 */
+    @Override
+    public List<TradeData> listData(String tableName) {
+        return tradeDataMapper.list(tableName);
+    }
 
 
 
     /**获取相似分析 */
+    @Override
     public  List<StockSimilar> getSimilarAnalysis(String code , int range, String key){
         String  cp_table = tableName_code(code);
         List<Double>  cp_ls= tradeDataMapper.getKeyList(cp_table,key,range);
@@ -262,7 +273,7 @@ public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData
 
      */
 
-    String tableName_code(String code)
+    public String tableName_code(String code)
     {
         String  table_name = stockInfoMapper.getTsByCode(code).replace(".","_").toLowerCase();
         return table_name;

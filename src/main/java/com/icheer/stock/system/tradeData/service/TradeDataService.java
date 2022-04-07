@@ -15,6 +15,8 @@ public interface TradeDataService  extends IService<TradeData> {
     /**get list By table_name */
     public List<TradeData> list(String code);
 
+    /** table_name */
+    public String tableName_code(String code);
     /**倒序 最新 100 条记录 */
     public List<TradeData> listDescByTradeDate(String code, Integer range);
 
@@ -38,5 +40,8 @@ public interface TradeDataService  extends IService<TradeData> {
 
     /** 大盘交易数据 */
     public List<StockTradeResult> getCompositeIndex();
+
+    /**获取所以数据正序 */
+    public List<TradeData> listData(String tableName);
 
 }

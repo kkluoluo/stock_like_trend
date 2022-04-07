@@ -142,15 +142,15 @@ public class AppBusinessController extends BaseController{
 
     /**
      * 市场行情-大盘综合指数
-     * @param  stockMap(code)  比较对象代码
-     * @param  stockMap(range) 比较时间范围
      * @return
      */
-//    @RequestMapping("/composite_index")
-//    @ResponseBody
-//    public Result composite_index(@RequestBody StockMap stockMap) throws IOException
-//    {
-//
-//
-//
+    @RequestMapping("/composite_index")
+    @ResponseBody
+    public Result composite_index() throws IOException {
+
+        return  new Result(200,"",getDataTable(tradeDataService.getCompositeIndex()));
+    }
+
+
+
 }

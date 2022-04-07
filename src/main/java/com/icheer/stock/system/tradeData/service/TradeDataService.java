@@ -36,5 +36,7 @@ public interface TradeDataService  extends IService<TradeData> {
     /**搜索BY code or name */
     public List<StockTradeResult> searchStockTrades(StockMap stockMap , Long userId);
 
+    /** 大盘交易数据 */
+    public List<StockTradeResult> getCompositeIndex();
 
 }

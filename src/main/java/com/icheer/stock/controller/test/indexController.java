@@ -76,9 +76,38 @@ public class indexController {
         return new Result(200,"success",stockInfoMapper.listByName(stockMap.getName()));
 
     }
+    /**
+     * 市场行情-大盘综合指数
+     *
+     * @return  近100日行情数据
+     */
+    @RequestMapping("/composite_index")
+    @ResponseBody
+    public Result composite_index0() throws IOException {
 
+        return  new Result(200,"",tradeDataService.getCompositeIndex());
+    }
 
-
+    /**
+     * 市场行情-大盘综合指数
+     *
+     * @return  分时数据，调用python脚本获取更新mysql数据再获取（存在延时）
+     */
+    @RequestMapping("/composite_index")
+    @ResponseBody
+    public Result composite_index() throws IOException {
+        return  new Result(200,"" ,testPython());
+    }
+        boolean testPython () {
+            String command = "cmd.exe /c cd  D:\\project\\stock_backend " + "&& start python test.py ";
+            try {
+                Process p = Runtime.getRuntime().exec(command);
+                return true;
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
 
     /**
      * 个股相似走势分析

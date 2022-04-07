@@ -105,6 +105,33 @@ public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData
         return stockTradeResults;
     }
 
+
+    /** 大盘交易数据 */
+    public List<StockTradeResult> getCompositeIndex(){
+
+        List<StockTradeResult> stockTradeResults = new ArrayList<>();
+        Map<String,String> table_index = new HashMap<>();
+        table_index.put("上证指数","sh_000001");
+        table_index.put("深证指数","sz_399001");
+        table_index.put("创业板指数","sz_399006");
+
+        for (String key:table_index.keySet())
+        {
+            List<TradeData> list    = tradeDataMapper.listDescByTradeDate(table_index.get(key),100);
+            StockTradeResult result = new StockTradeResult();
+            StockInfo composite = new StockInfo();
+            composite.setName(key);
+            composite.setTsCode(list.get(0).getTsCode());
+            result.setStockInfo(composite);
+            result.setTradeDataList(list);
+            stockTradeResults.add(result);
+        }
+        return  stockTradeResults;
+    }
+
+
+
+
     /**获取相似分析 */
     public  List<StockSimilar> getSimilarAnalysis(String code , int range, String key){
         String  cp_table = tableName_code(code);
@@ -240,6 +267,8 @@ public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData
         String  table_name = stockInfoMapper.getTsByCode(code).replace(".","_").toLowerCase();
         return table_name;
     }
+
+
 }
 
 

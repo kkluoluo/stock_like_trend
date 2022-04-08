@@ -3,6 +3,7 @@ package com.icheer.stock.system.tradeData.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import com.icheer.stock.system.stockInfo.service.StockInfoService;
+import com.icheer.stock.system.tradeData.entity.Id_Values;
 import com.icheer.stock.system.tradeData.entity.StockSimilar;
 import com.icheer.stock.system.stockInfo.entity.StockInfo;
 import com.icheer.stock.system.stockInfo.mapper.StockInfoMapper;
@@ -120,10 +121,10 @@ public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData
         table_index.put("上证指数","sh_000001");
         table_index.put("深证指数","sz_399001");
         table_index.put("创业板指数","sz_399006");
-
         for (String key:table_index.keySet())
         {
-            List<TradeData> list    = tradeDataMapper.listDescByTradeDate(table_index.get(key),100);
+            //大盘只显示指数，只返回一条last_one
+            List<TradeData> list    = tradeDataMapper.listDescByTradeDate(table_index.get(key),1);
             StockTradeResult result = new StockTradeResult();
             StockInfo composite = new StockInfo();
             composite.setName(key);
@@ -139,29 +140,28 @@ public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData
     public List<TradeData> listData(String tableName) {
         return tradeDataMapper.list(tableName);
     }
-
-
-
     /**获取相似分析 */
     @Override
-    public  List<StockSimilar> getSimilarAnalysis(String code , int range, String key){
+    public  List<StockSimilar> getSimilar_test(String code , int range,int pre_range, String key){
         String  cp_table = tableName_code(code);
         List<Double>  cp_ls= tradeDataMapper.getKeyList(cp_table,key,range);
-        List <StockInfo> CSI300list= stockInfoMapper.getCsi300();
+        List <StockInfo> CSI300list= stockInfoMapper.getCsi300_ts_code_name();
         Integer total_ranges = 600;
-        Integer window_len   = 30;
+        Integer window_len   = 10;
         List<Double> k_list = new ArrayList<>();
-        Map<Double,String> k_code  =new HashMap<>();
+        Map<Double,StockInfo> k_stock =new HashMap<>();
         Map<String,Integer> code_id =new HashMap<>();
         for(StockInfo each : CSI300list)
         {
             Double each_k  = 0.00;
             int   trade_id = 0;
-            String each_table = tableName_code(each.getCode());
-            List<Double> each_trades = tradeDataMapper.getKeyList(each_table,key,total_ranges);
-            List<String>  trades_ids = tradeDataMapper.getStringKeyList(each_table,"id",total_ranges);
+            String each_table = each.getTsCode().replace(".","_").toLowerCase();
+            List<Double> each_trades = new ArrayList<>();
+            List<Id_Values> idValues = tradeDataMapper.getIdAndKeyList(each_table,key,total_ranges);
+            for (Id_Values idValues1 : idValues)
+            {each_trades.add(idValues1.getMa5());}
             if (each_trades.size()<total_ranges) total_ranges = each_trades.size();
-            for(Integer i =10;i<total_ranges;i=i+window_len)
+            for(Integer i =pre_range;i<total_ranges;i=i+window_len)
             {
                 if(i+range>=total_ranges)
                 {break;}
@@ -169,27 +169,91 @@ public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData
                 Double K_like =getPearsonBydim(cp_ls,each_ls);
                 if(K_like>each_k){
                     each_k   = K_like;
-                    trade_id = Integer.valueOf(trades_ids.get(i));
+                    trade_id = idValues.get(i).getId();
                 }
             }
             k_list.add(each_k);
-            k_code.put(each_k,each.getCode());
+            k_stock.put(each_k,each);
             code_id.put(each.getCode(),trade_id);
         }
         Collections.sort(k_list,Collections.reverseOrder());
+        System.out.println(k_list);
         List<StockSimilar> similarList = new ArrayList<>();
         for( double similar:k_list.subList(0,10))
         {
             StockSimilar stockSimilar = new StockSimilar();
             stockSimilar.setSimilar(similar);
-            String si_code = k_code.get(similar);
-            stockSimilar.setCode(si_code);
-            stockSimilar.setName(stockInfoMapper.getByCode(si_code).getName());
-            Integer indexId = code_id.get(si_code) -range;
-            stockSimilar.setTradeData(tradeDataMapper.getTradeSinceId(tableName_code(si_code),indexId,range+20));
+//            StockInfo stock_info = k_stock.get(similar);
+            stockSimilar.setCode(k_stock.get(similar).getCode());
+            stockSimilar.setName(k_stock.get(similar).getName());
+            Integer indexId = code_id.get(k_stock.get(similar).getCode()) -range;
+            String si_table = k_stock.get(similar).getTsCode().replace(".","_").toLowerCase();
+            stockSimilar.setTradeData(tradeDataMapper.getTradeSinceId(si_table,indexId,range+pre_range));
             similarList.add(stockSimilar);
         }
+        StockSimilar similar_cp = new StockSimilar();
+        similar_cp.setSimilar(1.1);
+        similar_cp.setCode(code);
+//        similar_cp.setName(k_stock.get(similar).getName());
+        similar_cp.setTradeData(tradeDataMapper.listDescByTradeDate(cp_table,range));
+        similarList.add(0,similar_cp);
+        return similarList;
+    }
+
+
+    /**获取相似分析 */
+    @Override
+    public  List<StockSimilar> getSimilarAnalysis(String code , int range,int pre_range, String key){
+        String  cp_table = tableName_code(code);
+        List<Double>  cp_ls= tradeDataMapper.getKeyList(cp_table,key,range);
+        List <StockInfo> CSI300list= stockInfoMapper.getCsi300_ts_code_name();
+        Integer total_ranges = 600;
+        Integer window_len   = 30;
+        List<Double> k_list = new ArrayList<>();
+
+        Map<Double,StockInfo> k_stock =new HashMap<>();
+        Map<String,Integer> code_id =new HashMap<>();
+        for(StockInfo each : CSI300list)
+        {
+            Double each_k  = 0.00;
+            int   trade_id = 0;
+            String each_table = each.getTsCode().replace(".","_").toLowerCase();
+              List<Double> each_trades = new ArrayList<>();
+              List<Id_Values> idValues = tradeDataMapper.getIdAndKeyList(each_table,key,total_ranges);
+              for (Id_Values idValues1 : idValues)
+              {each_trades.add(idValues1.getMa5());}
+            if (each_trades.size()<total_ranges) total_ranges = each_trades.size();
+            for(Integer i =pre_range;i<total_ranges;i=i+window_len)
+            {
+                if(i+range>=total_ranges)
+                {break;}
+                List<Double> each_ls = each_trades.subList(i,range+i);
+                Double K_like =getPearsonBydim(cp_ls,each_ls);
+                if(K_like>each_k){
+                    each_k   = K_like;
+                    trade_id = idValues.get(i).getId();
+                }
+            }
+            k_list.add(each_k);
+            k_stock.put(each_k,each);
+            code_id.put(each.getCode(),trade_id);
+        }
+        Collections.sort(k_list,Collections.reverseOrder());
         System.out.println(k_list);
+        List<StockSimilar> similarList = new ArrayList<>();
+        for( double similar:k_list.subList(0,10))
+        {
+            StockSimilar stockSimilar = new StockSimilar();
+            stockSimilar.setSimilar(similar);
+//            StockInfo stock_info = k_stock.get(similar);
+            stockSimilar.setCode(k_stock.get(similar).getCode());
+            stockSimilar.setName(k_stock.get(similar).getName());
+            Integer indexId = code_id.get(k_stock.get(similar).getCode()) -range;
+            String si_table = k_stock.get(similar).getTsCode().replace(".","_").toLowerCase();
+            stockSimilar.setTradeData(tradeDataMapper.getTradeSinceId(si_table,indexId,range+pre_range));
+            similarList.add(stockSimilar);
+        }
+
     return similarList;
     }
 

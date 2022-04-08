@@ -17,6 +17,9 @@ public interface StockInfoMapper extends BaseMapper<StockInfo> {
     @SelectProvider(type= selectProvider.class,method="CSI300list")
     public List<StockInfo> getCsi300();
 
+    @SelectProvider(type= selectProvider.class,method="CSI300list_ts_code_name")
+    public List<StockInfo> getCsi300_ts_code_name();
+
     @SelectProvider(type= selectProvider.class,method="getByCode")
     public StockInfo getByCode(String  code );
 

@@ -1,6 +1,7 @@
 package com.icheer.stock.system.tradeData.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.icheer.stock.system.tradeData.entity.Id_Values;
 import com.icheer.stock.system.tradeData.entity.TradeData;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -20,6 +21,9 @@ public interface TradeDataMapper extends BaseMapper<TradeData> {
 
     @SelectProvider(type=TradeDataProvider.class,method="getKeyList")
     public List<Double> getKeyList(String table_name, String key,Integer range);
+
+    @SelectProvider(type=TradeDataProvider.class,method="getKeyIdList")
+    public List<Id_Values> getIdAndKeyList(String table_name, String key, Integer range);
 
     @SelectProvider(type=TradeDataProvider.class,method="StringKeyList")
     public List<String> getStringKeyList(String table_name, String key,Integer range);

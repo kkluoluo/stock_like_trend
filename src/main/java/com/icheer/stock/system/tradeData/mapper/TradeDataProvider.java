@@ -31,6 +31,11 @@ public class TradeDataProvider {
         return "select "+ key + " from "+ table_name + " order by trade_date desc limit "+ String.valueOf(range);
     }
 
+    public String getKeyIdList(String table_name, String key ,Integer range)
+    {
+        return "select id ,  "+ key + " from "+ table_name + " order by trade_date desc limit "+ String.valueOf(range);
+    }
+
     public  String StringKeyList(String table_name, String key ,Integer range)
     {
         return "select "+ key + " from "+ table_name + " order by trade_date desc limit "+ String.valueOf(range);

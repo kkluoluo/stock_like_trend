@@ -19,4 +19,8 @@ public class selectProvider {
     public  String listByName(String name){
         return "select * from a_shares where  deleted ='0' and name like '%" + name+"%' " ;
     }
+
+    public  String CSI300list_ts_code_name(){
+        return "select ts_code,code,name from a_shares where csi300_flag = '1' and  deleted = '0' ";
+    }
 }

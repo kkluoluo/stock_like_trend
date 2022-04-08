@@ -30,7 +30,7 @@ public interface TradeDataService  extends IService<TradeData> {
     public List<TradeData> getTradeSinceId(String code,  Integer id, Integer range);
 
     /**获取相似分析 */
-    public  List<StockSimilar> getSimilarAnalysis(String code , int range, String key);
+    public  List<StockSimilar> getSimilarAnalysis(String code , int range, int pre_range,  String key);
 
     /**获取StockTradeResult*/
     public StockTradeResult getStockTradeResult(StockInfo stock);
@@ -43,5 +43,8 @@ public interface TradeDataService  extends IService<TradeData> {
 
     /**获取所以数据正序 */
     public List<TradeData> listData(String tableName);
+
+    /**test */
+    public  List<StockSimilar> getSimilar_test(String code , int range,int pre_range, String key);
 
 }

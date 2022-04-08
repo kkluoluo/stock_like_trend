@@ -26,6 +26,8 @@ public class Test {
 
     private String mo;
 
+    private String flag;
+
     private String anCode;
 
     private Double k;

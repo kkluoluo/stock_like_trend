@@ -136,7 +136,9 @@ public class AppBusinessController extends BaseController{
         userHistoryService.setSearchHistory(Integer.valueOf(userId.toString()),stockMap.getCode());
 
         /** 对比对象的30交易数据*/
-        List<StockSimilar>  similarList=  tradeDataService.getSimilarAnalysis(stockMap.getCode(),stockMap.getRange(),"ma5");
+        int preRange = 5;
+        if (stockMap.getRange()>preRange) preRange =stockMap.getPreRange();
+        List<StockSimilar>  similarList=  tradeDataService.getSimilarAnalysis(stockMap.getCode(),stockMap.getRange(),preRange,"ma5");
         return new Result(200,"",similarList);
     }
 

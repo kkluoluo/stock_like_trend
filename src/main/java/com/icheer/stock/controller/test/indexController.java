@@ -3,7 +3,9 @@ package com.icheer.stock.controller.test;
 import com.icheer.stock.controller.test.testResult.entity.Test;
 import com.icheer.stock.controller.test.testResult.service.TestService;
 import com.icheer.stock.system.stockInfo.mapper.StockInfoMapper;
+import com.icheer.stock.system.tradeData.entity.Id_Values;
 import com.icheer.stock.system.tradeData.entity.StockSimilar;
+import com.icheer.stock.system.tradeData.mapper.TradeDataMapper;
 import com.icheer.stock.system.tradeData.service.TradeDataService;
 import com.icheer.stock.system.stockInfo.entity.StockInfo;
 import com.icheer.stock.system.stockInfo.service.StockInfoService;
@@ -13,6 +15,7 @@ import com.icheer.stock.util.Result;
 import com.icheer.stock.util.ServerVersion;
 import com.icheer.stock.util.StockMap;
 import com.icheer.stock.util.StockTradeResult;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -21,8 +24,8 @@ import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.*;
 
-//@Controller
-//@RequestMapping("/test01")
+@Controller
+@RequestMapping("/test")
 public class indexController {
 
     @Resource
@@ -36,6 +39,8 @@ public class indexController {
 
     @Resource
     private StockInfoMapper stockInfoMapper;
+    @Resource
+    private TradeDataMapper tradeDataMapper;
 
 
     /**
@@ -48,7 +53,7 @@ public class indexController {
     @ResponseBody
     public Result stock_analysis2(@RequestBody StockMap stockMap) throws IOException
     {
-      List<StockSimilar>  list=  tradeDataService.getSimilarAnalysis(stockMap.getCode(),stockMap.getRange(),"ma5");
+      List<StockSimilar>  list=  tradeDataService.getSimilarAnalysis(stockMap.getCode(),stockMap.getRange(),stockMap.getPreRange(),"ma5");
       return  new Result(200,"",list);
     }
 
@@ -57,11 +62,8 @@ public class indexController {
     @ResponseBody
     public Result stock_test(@RequestBody StockMap stockMap) throws IOException
     {
-
-        /**分类搜索**/
-        List<StockTradeResult> stockTradeResults = tradeDataService.searchStockTrades(stockMap,Long.valueOf(1));
-        stockInfoMapper.listByName(stockMap.getName());
-        return new Result(200,"success",stockInfoMapper.listByName(stockMap.getName()));
+        List<StockSimilar>  list=  tradeDataService.getSimilar_test(stockMap.getCode(),stockMap.getRange(),stockMap.getPreRange(),"ma5");
+        return  new Result(200,"",list);
 
     }
     /**
@@ -81,7 +83,7 @@ public class indexController {
      *
      * @return  分时数据，调用python脚本获取更新mysql数据再获取（存在延时）
      */
-    @RequestMapping("/composite_index")
+    @RequestMapping("/composite_index_min")
     @ResponseBody
     public Result composite_index() throws IOException {
         return  new Result(200,"" ,testPython());
@@ -122,8 +124,11 @@ public class indexController {
         {
             Double each_k  = 0.00;
             int   trade_id = 0;
-            List<Double> each_trades = tradeDataService.getKeyList(each.getCode(),key,total_ranges);
-            List<String>  trades_ids = tradeDataService.listStringByKey(each.getCode(),"id",total_ranges);
+            String each_table = each.getTsCode().replace(".","_").toLowerCase();
+            List<Double> each_trades = new ArrayList<>();
+            List<Id_Values> idValues = tradeDataMapper.getIdAndKeyList(each_table,key,total_ranges);
+            for (Id_Values idValues1 : idValues)
+            {each_trades.add(idValues1.getMa5());}
             if (each_trades.size()<total_ranges) total_ranges = each_trades.size();
 
             for(Integer i =10;i<total_ranges;i=i+window_len)
@@ -134,7 +139,7 @@ public class indexController {
                 Double K_like =getPearsonBydim(cp_ls,each_ls);
                 if(K_like>each_k){
                     each_k   = K_like;
-                    trade_id = Integer.valueOf(trades_ids.get(i));
+                    trade_id = idValues.get(i).getId();
                 }
             }
             k_list.add(each_k);
@@ -146,12 +151,6 @@ public class indexController {
         for( double similar:k_list.subList(0,10))
         {
             StockSimilar stockSimilar = new StockSimilar();
-//            List<String> list  = new ArrayList<>();
-//            String code = k_code.get(similar);
-//            list.add(code);
-//            list.add(String.valueOf(similar));
-//            list.add(stockInfoService.getOneByCode(code).getName());
-//            list.add(code_id.get(code).toString());
             Test t = new Test();
             t.setK(similar);
             String code = k_code.get(similar);

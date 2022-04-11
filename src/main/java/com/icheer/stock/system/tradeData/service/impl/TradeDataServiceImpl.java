@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.*;
 
 @Service
@@ -95,10 +96,7 @@ public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData
             }
         }else
         {
-//            ExcludeEmptyQueryWrapper<StockInfo> stockQuery = new ExcludeEmptyQueryWrapper<>();
-//            stockQuery.eq("deleted",0);
-//            stockQuery.like("name",stockMap.getName());
-//            List<StockInfo> stocks= stockInfoMapper.selectList(stockQuery);
+
             List<StockInfo> stocks= stockInfoMapper.listByName(stockMap.getName());
             userHistoryService.setSearchNameHistory(Integer.valueOf(userId.toString()),stockMap.getName());
             if (stocks != null)
@@ -144,22 +142,25 @@ public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData
     @Override
     public  List<StockSimilar> getSimilar_test(String code , int range,int pre_range, String key){
         String  cp_table = tableName_code(code);
+        String  cp_name  = stockInfoMapper.getByCode(code).getName();
         List<Double>  cp_ls= tradeDataMapper.getKeyList(cp_table,key,range);
         List <StockInfo> CSI300list= stockInfoMapper.getCsi300_ts_code_name();
         Integer total_ranges = 600;
         Integer window_len   = 10;
         List<Double> k_list = new ArrayList<>();
         Map<Double,StockInfo> k_stock =new HashMap<>();
-        Map<String,Integer> code_id =new HashMap<>();
+//        Map<String,Integer> code_id =new HashMap<>();
         for(StockInfo each : CSI300list)
         {
             Double each_k  = 0.00;
-            int   trade_id = 0;
+//            int   trade_id = 0;
             String each_table = each.getTsCode().replace(".","_").toLowerCase();
-            List<Double> each_trades = new ArrayList<>();
-            List<Id_Values> idValues = tradeDataMapper.getIdAndKeyList(each_table,key,total_ranges);
-            for (Id_Values idValues1 : idValues)
-            {each_trades.add(idValues1.getMa5());}
+            List<Double> each_trades = tradeDataMapper.getKeyList(each_table,key,total_ranges);
+            List<String> each_index =  tradeDataMapper.getStringKeyList(each_table,"id",total_ranges);
+//            List<Double> each_trades = new ArrayList<>();
+//            List<Id_Values> idValues = tradeDataMapper.getIdAndKeyList(each_table,key,total_ranges);
+//            for (Id_Values idValues1 : idValues)
+//            {each_trades.add(idValues1.getMa5());}
             if (each_trades.size()<total_ranges) total_ranges = each_trades.size();
             for(Integer i =pre_range;i<total_ranges;i=i+window_len)
             {
@@ -169,34 +170,49 @@ public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData
                 Double K_like =getPearsonBydim(cp_ls,each_ls);
                 if(K_like>each_k){
                     each_k   = K_like;
-                    trade_id = idValues.get(i).getId();
+                    /**---交易日期---**/
+//                    trade_id = idValues.get(i).getId();
+//                    each.setListDate(idValues.get(i).getTradeDate());
+//                    each.setId(idValues.get(i).getId());
+                    each.setId(Integer.valueOf(each_index.get(i)));
                 }
             }
             k_list.add(each_k);
             k_stock.put(each_k,each);
-            code_id.put(each.getCode(),trade_id);
+//            code_id.put(each.getCode(),trade_id);
         }
+        //排序
         Collections.sort(k_list,Collections.reverseOrder());
-        System.out.println(k_list);
+        //返回数据整合
         List<StockSimilar> similarList = new ArrayList<>();
         for( double similar:k_list.subList(0,10))
         {
             StockSimilar stockSimilar = new StockSimilar();
             stockSimilar.setSimilar(similar);
-//            StockInfo stock_info = k_stock.get(similar);
+            StockInfo stock_info = k_stock.get(similar);
             stockSimilar.setCode(k_stock.get(similar).getCode());
             stockSimilar.setName(k_stock.get(similar).getName());
-            Integer indexId = code_id.get(k_stock.get(similar).getCode()) -range;
-            String si_table = k_stock.get(similar).getTsCode().replace(".","_").toLowerCase();
-            stockSimilar.setTradeData(tradeDataMapper.getTradeSinceId(si_table,indexId,range+pre_range));
+            String si_table = stock_info.getTsCode().replace(".","_").toLowerCase();
+            TradeData last_trade = tradeDataMapper.getById(si_table,stock_info.getId());
+            stockSimilar.setLastDate(last_trade.getTradeDate());
+            stockSimilar.setStartDate(tradeDataMapper.getById(si_table,stock_info.getId()-range).getTradeDate());
+            /**--预测涨跌幅---**/
+            double pre_pct = (tradeDataMapper.getById(si_table,stock_info.getId()+pre_range).getClose()-last_trade.getClose())/last_trade.getClose();
+            stockSimilar.setChange(pre_pct);
+            //            Integer indexId = code_id.get(k_stock.get(similar).getCode()) -range;
+//            String si_table = k_stock.get(similar).getTsCode().replace(".","_").toLowerCase();
+            stockSimilar.setTradeData(tradeDataMapper.getTradeSinceId(si_table,stock_info.getId()-range,range+pre_range));
             similarList.add(stockSimilar);
         }
         StockSimilar similar_cp = new StockSimilar();
-        similar_cp.setSimilar(1.1);
+        similar_cp.setSimilar(1.0);
         similar_cp.setCode(code);
-//        similar_cp.setName(k_stock.get(similar).getName());
+        similar_cp.setName(cp_name);
         similar_cp.setTradeData(tradeDataMapper.listDescByTradeDate(cp_table,range));
+        similar_cp.setLastDate(similar_cp.getTradeData().get(0).getTradeDate());
+        similar_cp.setStartDate(similar_cp.getTradeData().get(range-1).getTradeDate());
         similarList.add(0,similar_cp);
+        System.out.println(similarList);
         return similarList;
     }
 
@@ -306,36 +322,6 @@ public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData
         }
     }
 
-    /** 皮尔逊相关度系数 int计算，但是速度没有优化太多and结果会被0.0*/
-    /*
-    public static Double getPearsonBydim2(List<Double> ratingOne, List<Double> ratingTwo) {
-        if(ratingOne.size() != ratingTwo.size()) {//两个变量的观测值是成对的，每对观测值之间相互独立。
-            return null;
-        }
-        double sim = 0D;//最后的皮尔逊相关度系数
-        int commonItemsLen = ratingOne.size();//操作数的个数
-        int oneSum = 0;//第一个相关数的和
-        int twoSum = 0;//第二个相关数的和
-        for(int i=0; i<commonItemsLen; i++) {
-            oneSum += ratingOne.get(i)*100;
-            twoSum += ratingTwo.get(i)*100;
-        }
-        int oneAvg = oneSum/commonItemsLen;//第一个相关数的平均值
-        int twoAvg = twoSum/commonItemsLen;//第二个相关数的平均值
-        int sonSum = 0;
-        int tempOne = 0;
-        int tempTwo = 0;
-        for(int i=0; i<commonItemsLen; i++) {
-            sonSum += (ratingOne.get(i)*100-oneAvg)*(ratingTwo.get(i)-twoAvg);
-            tempOne += Math.pow((ratingOne.get(i)*100-oneAvg), 2);
-            tempTwo += Math.pow((ratingTwo.get(i)*100-twoAvg), 2);
-        }
-        double fatherSum = Math.sqrt(tempOne * tempTwo);
-        sim = (fatherSum == 0) ? 1 : sonSum / fatherSum;
-        return sim;
-    }
-
-     */
 
     public String tableName_code(String code)
     {

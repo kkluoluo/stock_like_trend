@@ -36,6 +36,11 @@ public class TradeDataProvider {
         return "select id ,  "+ key + " from "+ table_name + " order by trade_date desc limit "+ String.valueOf(range);
     }
 
+    public String getKeyDateList(String table_name, String key ,Integer range)
+    {
+        return "select trade_date ,  "+ key + " from "+ table_name + " order by trade_date desc limit "+ String.valueOf(range);
+    }
+
     public  String StringKeyList(String table_name, String key ,Integer range)
     {
         return "select "+ key + " from "+ table_name + " order by trade_date desc limit "+ String.valueOf(range);
@@ -43,5 +48,10 @@ public class TradeDataProvider {
 
     public String getTradeSinceId(String table_name,  Integer id, Integer range){
         return "select * from "+ table_name +" where id between " + id.toString() +" and " +String.valueOf(id+range);
+    }
+
+    public String getById(String table_name, Integer id )
+    {
+        return "select * from "+ table_name +" where id = " + id.toString() ;
     }
 }

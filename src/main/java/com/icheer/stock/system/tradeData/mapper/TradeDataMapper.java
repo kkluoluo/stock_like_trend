@@ -25,9 +25,16 @@ public interface TradeDataMapper extends BaseMapper<TradeData> {
     @SelectProvider(type=TradeDataProvider.class,method="getKeyIdList")
     public List<Id_Values> getIdAndKeyList(String table_name, String key, Integer range);
 
+    @SelectProvider(type=TradeDataProvider.class,method="getKeyDateList")
+    public List<Id_Values> getDateAndKeyList(String table_name, String key, Integer range);
+
+
     @SelectProvider(type=TradeDataProvider.class,method="StringKeyList")
     public List<String> getStringKeyList(String table_name, String key,Integer range);
 
     @SelectProvider(type=TradeDataProvider.class,method="getTradeSinceId")
     public List<TradeData> getTradeSinceId(String table_name, Integer id, Integer range);
+
+    @SelectProvider(type=TradeDataProvider.class,method="getById")
+    public TradeData getById(String table_name, Integer id );
 }

@@ -142,6 +142,22 @@ public class AppBusinessController extends BaseController{
         return new Result(200,"",similarList);
     }
 
+
+    @RequestMapping("/stock_test")
+    @ResponseBody
+    public Result stock_test(@RequestBody StockMap stockMap) throws IOException
+    {
+        Long userId = (Long) SecurityUtils.getSubject().getSession().getAttribute("userId");
+        userHistoryService.setSearchHistory(Integer.valueOf(userId.toString()),stockMap.getCode());
+
+        /** 对比对象的30交易数据*/
+        int preRange = 5;
+        if (stockMap.getRange()>preRange) preRange =stockMap.getPreRange();
+        List<StockSimilar>  list=  tradeDataService.getSimilar_test(stockMap.getCode(),stockMap.getRange(),preRange,"ma5");
+        return  new Result(200,"",list);
+
+    }
+
     /**
      * 市场行情-大盘综合指数
      * @return

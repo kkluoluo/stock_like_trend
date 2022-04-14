@@ -5,6 +5,7 @@ import com.icheer.stock.controller.test.testResult.service.TestService;
 import com.icheer.stock.system.stockInfo.mapper.StockInfoMapper;
 import com.icheer.stock.system.tradeData.entity.Id_Values;
 import com.icheer.stock.system.tradeData.entity.StockSimilar;
+import com.icheer.stock.system.tradeData.entity.TradeData;
 import com.icheer.stock.system.tradeData.mapper.TradeDataMapper;
 import com.icheer.stock.system.tradeData.service.TradeDataService;
 import com.icheer.stock.system.stockInfo.entity.StockInfo;
@@ -66,6 +67,16 @@ public class indexController {
         return  new Result(200,"",list);
 
     }
+
+
+    @RequestMapping("/stock_list")
+    @ResponseBody
+    public Result stock_list() throws IOException
+    {
+        List<TradeData>  list=  tradeDataService.list("000001");
+        return  new Result(200,"",list);
+
+    }
     /**
      * 市场行情-大盘综合指数
      *
@@ -116,7 +127,7 @@ public class indexController {
         List<Double> cp_ls= tradeDataService.getKeyList(stockMap.getCode(),key,stockMap.getRange());
         List <StockInfo> CSI300list=stockInfoService.getCSI300List();
         Integer total_ranges = 600;
-        Integer window_len   = 30;
+        Integer window_len   = 5;
         List<Double> k_list = new ArrayList<>();
         Map<Double,String> k_code  =new HashMap<>();
         Map<String,Integer> code_id =new HashMap<>();

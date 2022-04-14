@@ -146,7 +146,7 @@ public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData
         List<Double>  cp_ls= tradeDataMapper.getKeyList(cp_table,key,range);
         List <StockInfo> CSI300list= stockInfoMapper.getCsi300_ts_code_name();
         Integer total_ranges = 600;
-        Integer window_len   = 10;
+        Integer window_len   = range/6;
         List<Double> k_list = new ArrayList<>();
         Map<Double,StockInfo> k_stock =new HashMap<>();
 //        Map<String,Integer> code_id =new HashMap<>();
@@ -166,8 +166,7 @@ public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData
             {
                 if(i+range>=total_ranges)
                 {break;}
-                List<Double> each_ls = each_trades.subList(i,range+i);
-                Double K_like =getPearsonBydim(cp_ls,each_ls);
+                Double K_like =getPearsonBydim(cp_ls,each_trades.subList(i,range+i));
                 if(K_like>each_k){
                     each_k   = K_like;
                     /**---交易日期---**/
@@ -212,7 +211,7 @@ public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData
         similar_cp.setLastDate(similar_cp.getTradeData().get(0).getTradeDate());
         similar_cp.setStartDate(similar_cp.getTradeData().get(range-1).getTradeDate());
         similarList.add(0,similar_cp);
-        System.out.println(similarList);
+        System.out.println(k_list);
         return similarList;
     }
 
@@ -224,7 +223,7 @@ public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData
         List<Double>  cp_ls= tradeDataMapper.getKeyList(cp_table,key,range);
         List <StockInfo> CSI300list= stockInfoMapper.getCsi300_ts_code_name();
         Integer total_ranges = 600;
-        Integer window_len   = 30;
+        Integer window_len   = range/6;
         List<Double> k_list = new ArrayList<>();
 
         Map<Double,StockInfo> k_stock =new HashMap<>();

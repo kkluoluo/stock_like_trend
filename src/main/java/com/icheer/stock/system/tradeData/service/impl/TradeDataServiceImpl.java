@@ -138,15 +138,17 @@ public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData
     public List<TradeData> listData(String tableName) {
         return tradeDataMapper.list(tableName);
     }
-    /**获取相似分析 */
+
+
+    /**获取相似分析 ----new----*/
     @Override
-    public  List<StockSimilar> getSimilar_test(String code , int range,int pre_range, String key){
+    public  List<StockSimilar> getSimilar_Analysis(String code , int range,int pre_range, String key){
         String  cp_table = tableName_code(code);
         String  cp_name  = stockInfoMapper.getByCode(code).getName();
         List<Double>  cp_ls= tradeDataMapper.getKeyList(cp_table,key,range);
         List <StockInfo> CSI300list= stockInfoMapper.getCsi300_ts_code_name();
         Integer total_ranges = 600;
-        Integer window_len   = range/6;
+        Integer window_len   = 30;
         List<Double> k_list = new ArrayList<>();
         Map<Double,StockInfo> k_stock =new HashMap<>();
 //        Map<String,Integer> code_id =new HashMap<>();

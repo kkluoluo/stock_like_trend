@@ -29,7 +29,7 @@ public class UserHistoryServiceImpl  extends ServiceImpl<UserHistoryMapper, User
     /**搜索记录 */
     public  void setSearchHistory(int userId, String code ){
 
-        String log  = LocalDateTime.now().toString()+".USER."+String.valueOf(userId)+"._search_stock_code."+ code+stockInfoService.getOneByCode(code).getName();
+        String log  = LocalDateTime.now().toString()+".USER."+String.valueOf(userId)+"._search_stock_code."+ code;
         UserHistory userHistory = new UserHistory();
         userHistory.setCreateTime(LocalDateTime.now());
         userHistory.setUserId(userId);

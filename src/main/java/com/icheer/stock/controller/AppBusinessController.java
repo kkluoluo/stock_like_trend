@@ -1,5 +1,6 @@
 package com.icheer.stock.controller;
 
+import com.icheer.stock.system.processedTabel.service.ProcessedTableService;
 import com.icheer.stock.system.stockInfo.entity.StockInfo;
 import com.icheer.stock.system.stockInfo.service.StockInfoService;
 import com.icheer.stock.system.tradeData.entity.StockSimilar;
@@ -43,7 +44,8 @@ public class AppBusinessController extends BaseController{
     private ServerVersion serverVersion;
 
     @Resource
-    private StockInfoService stockInfoService;
+    private ProcessedTableService processedTableService;
+
 
     @Resource
     private TradeDataService tradeDataService;
@@ -123,7 +125,7 @@ public class AppBusinessController extends BaseController{
 
 
     /**
-     * 个股相似走势分析
+     * 个股相似走势分析----威尔逊相干法
      * @param  stockMap(code)  比较对象代码
      * @param  stockMap(range) 比较时间范围
      * @return
@@ -138,24 +140,29 @@ public class AppBusinessController extends BaseController{
         /** 对比对象的30交易数据*/
         int preRange = 5;
         if (stockMap.getRange()>preRange) preRange =stockMap.getPreRange();
-        List<StockSimilar>  similarList=  tradeDataService.getSimilarAnalysis(stockMap.getCode(),stockMap.getRange(),preRange,"ma5");
-        return new Result(200,"",similarList);
+        System.out.println(stockMap);
+        if (stockMap.getModel().equalsIgnoreCase("KL"))
+        {
+            List<StockSimilar> similarList = processedTableService.getKLineSimilar(stockMap);
+            return new Result(200, "", similarList);
+        }else
+        {
+            List<StockSimilar>  similarList= tradeDataService.getSimilar_Analysis(stockMap.getCode(),stockMap.getRange(),preRange,"ma5");
+            return new Result(200,"",similarList);
+        }
+
     }
 
 
-    @RequestMapping("/stock_test")
-    @ResponseBody
-    public Result stock_test(@RequestBody StockMap stockMap) throws IOException
-    {
-        Long userId = (Long) SecurityUtils.getSubject().getSession().getAttribute("userId");
-        userHistoryService.setSearchHistory(Integer.valueOf(userId.toString()),stockMap.getCode());
-
-        /** 对比对象的30交易数据*/
-        int preRange = 5;
-        if (stockMap.getRange()>preRange) preRange =stockMap.getPreRange();
-        List<StockSimilar>  list=  tradeDataService.getSimilar_test(stockMap.getCode(),stockMap.getRange(),preRange,"ma5");
-        return  new Result(200,"",list);
-
+    /**
+     * K线相似---斜率算法
+     * @param stockMap /
+     * @return /
+     */
+    @RequestMapping("/getSimilarRes")
+    public Result getSimilarRes(@RequestBody StockMap stockMap) {
+        List<StockSimilar> similarList = processedTableService.getKLineSimilar(stockMap);
+        return new Result(200, "", similarList);
     }
 
     /**

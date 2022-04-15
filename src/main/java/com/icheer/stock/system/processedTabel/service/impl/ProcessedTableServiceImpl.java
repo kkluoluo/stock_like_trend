@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.icheer.stock.system.processedTabel.entity.ProcessedTable;
 import com.icheer.stock.system.processedTabel.mapper.ProcessedTableMapper;
 import com.icheer.stock.system.processedTabel.service.ProcessedTableService;
+import com.icheer.stock.system.stockInfo.service.StockInfoService;
 import com.icheer.stock.system.tradeData.entity.StockSimilar;
 import com.icheer.stock.system.tradeData.entity.TradeData;
 import com.icheer.stock.system.tradeData.service.TradeDataService;
@@ -11,6 +12,7 @@ import com.icheer.stock.util.StockMap;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
@@ -23,6 +25,9 @@ public class ProcessedTableServiceImpl extends ServiceImpl<ProcessedTableMapper,
 
     @Resource
     private TradeDataService tradeDataService;
+
+    @Resource
+    private StockInfoService stockInfoService;
 
     @Override
     public ArrayList<ProcessedTable> list(String table_name) {
@@ -189,9 +194,24 @@ public class ProcessedTableServiceImpl extends ServiceImpl<ProcessedTableMapper,
             StockSimilar stockSimilar = new StockSimilar();
             stockSimilar.setCode(codeRes[i]);
             stockSimilar.setSimilar(similarities[i]);
+            stockSimilar.setName(stockInfoService.getOneByCode(stockSimilar.getCode()).getName());
             stockSimilar.setTradeData(tradeDataService.getTradeSinceId(codeRes[i],startIdOriginRes[i], stockMap.getRange()+20));
+            stockSimilar.setStartDate(stockSimilar.getTradeData().get(0).getTradeDate());
+            stockSimilar.setLastDate(LocalDate.now());
+            Integer size = stockSimilar.getTradeData().size();
+            double change =( stockSimilar.getTradeData().get(size-1).getClose()-stockSimilar.getTradeData().get(0).getClose())/stockSimilar.getTradeData().get(0).getClose();
+            stockSimilar.setChange(change);
             similarList.add(stockSimilar);
         }
+        /**对比对象*/
+        StockSimilar stockSimilar = new StockSimilar();
+        stockSimilar.setCode(stockMap.getCode());
+        stockSimilar.setSimilar(1.0);
+        stockSimilar.setName(stockInfoService.getOneByCode(stockMap.getCode()).getName());
+        stockSimilar.setTradeData(tradeDataService.listDescByTradeDate(stockMap.getCode(),stockMap.getRange()));
+        stockSimilar.setLastDate(stockSimilar.getTradeData().get(0).getTradeDate());
+        stockSimilar.setStartDate(stockSimilar.getTradeData().get(stockMap.getRange()-1).getTradeDate());
+        similarList.add(0,stockSimilar);
         return similarList;
     }
 

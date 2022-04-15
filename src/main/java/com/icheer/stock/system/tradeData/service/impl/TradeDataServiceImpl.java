@@ -139,6 +139,10 @@ public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData
         return tradeDataMapper.list(tableName);
     }
 
+    @Override
+    public Integer getTableSize(String tableName) {
+        return tradeDataMapper.getTableSize(tableName);
+    }
 
     /**获取相似分析 ----new----*/
     @Override

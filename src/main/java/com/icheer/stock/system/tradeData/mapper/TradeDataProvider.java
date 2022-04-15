@@ -54,4 +54,8 @@ public class TradeDataProvider {
     {
         return "select * from "+ table_name +" where id = " + id.toString() ;
     }
+    public String getTableSize(String table_name){
+        return "select count(*) from "+ table_name;
+    }
+
 }

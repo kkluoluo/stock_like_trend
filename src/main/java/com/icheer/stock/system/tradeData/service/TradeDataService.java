@@ -44,6 +44,9 @@ public interface TradeDataService  extends IService<TradeData> {
     /**获取所以数据正序 */
     public List<TradeData> listData(String tableName);
 
+    /**获取表行数 */
+    public Integer getTableSize(String tableName);
+
     /**分析接口---new---*/
     public  List<StockSimilar> getSimilar_Analysis(String code , int range,int pre_range, String key);
 

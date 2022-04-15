@@ -37,4 +37,8 @@ public interface TradeDataMapper extends BaseMapper<TradeData> {
 
     @SelectProvider(type=TradeDataProvider.class,method="getById")
     public TradeData getById(String table_name, Integer id );
+
+
+    @SelectProvider(type=TradeDataProvider.class,method="getTableSize")
+    public Integer getTableSize(String table_name);
 }

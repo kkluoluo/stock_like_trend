@@ -2,6 +2,7 @@ package com.icheer.stock.system.processedTabel.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.icheer.stock.system.processedTabel.entity.ProcessedTable;
+import com.icheer.stock.system.processedTabel.entity.TestProcessedRes;
 import com.icheer.stock.system.processedTabel.mapper.ProcessedTableMapper;
 import com.icheer.stock.system.processedTabel.service.ProcessedTableService;
 import com.icheer.stock.system.stockInfo.service.StockInfoService;
@@ -52,8 +53,7 @@ public class ProcessedTableServiceImpl extends ServiceImpl<ProcessedTableMapper,
         String tsCode = tradeDataService.tableName_code(stockMap.getCode());
         int range = stockMap.getRange();
         // 获取所选股票的原始数据
-        List<TradeData> listTradeData = tradeDataService.listData(tsCode);
-        int endIndex = listTradeData.size();
+        int endIndex = tradeDataService.getTableSize(tsCode);
         int startIndex = endIndex - range-1;
         // 获取所选股票的processed数据
         List<ProcessedTable> listProcessedTable = list("processed_" + tsCode);
@@ -96,10 +96,20 @@ public class ProcessedTableServiceImpl extends ServiceImpl<ProcessedTableMapper,
         String[] codeRes = new String[10];
         //相似结果在对应code的表中的起始ID
         int[] startIdOriginRes = new int[10];
+        //相似结果的天数（range）
+        int[] originIdRangeRes = new int[10];
+
+        //测试用结果
+        String[] tableNameRes = new String[10];
+        int[] startIDRes = new int[10];
+
 
         //计时
         long endTime=System.currentTimeMillis(); //获取结束时间
         System.out.println("程序运行时间： "+(endTime-startTime)+"ms");
+
+        //测试循环次数
+        int matchSum = 0;
         for (int i = 0; i < 300; i++) {
             //CSI300对应表名
             String tableName = listHS300.get(i).toLowerCase().replace('.', '_');
@@ -123,6 +133,9 @@ public class ProcessedTableServiceImpl extends ServiceImpl<ProcessedTableMapper,
             }
             // 当前表 匹配的 索引集合 startIndex(ID)
             ArrayList<Integer> indexMatchList = searchAllIndex(letterMatch.toString(),ma5TrendLetter.toString());
+
+            // 循环次数
+            matchSum += indexMatchList.size();
             for (int startID : indexMatchList) {
                 int pointLenMatch = listMatch.get(startID+matchLen-1).getCurPoint() - listMatch.get(startID).getIniPoint();
 
@@ -173,10 +186,20 @@ public class ProcessedTableServiceImpl extends ServiceImpl<ProcessedTableMapper,
                             similarities[k + 1] = similarities[k];
                             codeRes[k + 1] = codeRes[k];
                             startIdOriginRes[k + 1] = startIdOriginRes[k];
+                            originIdRangeRes[k+1] = originIdRangeRes[k];
+
+                            //测试用tableName
+                            tableNameRes[k + 1] = tableNameRes[k];
+                            startIDRes[k + 1] = startIDRes[k];
                         }
                         similarities[k] = similarity;
                         codeRes[k] = tableName.substring(0,6);
-                        startIdOriginRes[k] = listMatch.get(startID + 1).getIniPoint();
+                        startIdOriginRes[k] = listMatch.get(startID).getIniPoint();
+                        originIdRangeRes[k] = listMatch.get(startID + matchLen -1).getCurPoint() - startIdOriginRes[k];
+                        //测试用tableName
+                        tableNameRes[k] = tableName;
+                        startIDRes[k] = startID + 1;
+
                         flag = false;
                         break;
                     }
@@ -184,34 +207,37 @@ public class ProcessedTableServiceImpl extends ServiceImpl<ProcessedTableMapper,
                 if (flag) {
                     similarities[9] = similarity;
                     codeRes[9] = tableName.substring(0,6);
-                    startIdOriginRes[9] = listMatch.get(startID + 1).getIniPoint();
+                    startIdOriginRes[9] = listMatch.get(startID).getIniPoint();
+
+                    originIdRangeRes[9] = listMatch.get(startID + matchLen -1).getCurPoint() - startIdOriginRes[9];
+                    //测试用tableName
+                    tableNameRes[9] = tableName;
+                    startIDRes[9] = startID + 1;
                 }
             }
         }
+        endTime=System.currentTimeMillis(); //获取结束时间
+        System.out.println("程序运行时间： "+(endTime-startTime)+"ms");
         //输出结果
         List<StockSimilar> similarList = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
             StockSimilar stockSimilar = new StockSimilar();
             stockSimilar.setCode(codeRes[i]);
             stockSimilar.setSimilar(similarities[i]);
-            stockSimilar.setName(stockInfoService.getOneByCode(stockSimilar.getCode()).getName());
-            stockSimilar.setTradeData(tradeDataService.getTradeSinceId(codeRes[i],startIdOriginRes[i], stockMap.getRange()+20));
-            stockSimilar.setStartDate(stockSimilar.getTradeData().get(0).getTradeDate());
-            stockSimilar.setLastDate(LocalDate.now());
-            Integer size = stockSimilar.getTradeData().size();
-            double change =( stockSimilar.getTradeData().get(size-1).getClose()-stockSimilar.getTradeData().get(0).getClose())/stockSimilar.getTradeData().get(0).getClose();
-            stockSimilar.setChange(change);
+            stockSimilar.setTradeData(tradeDataService.getTradeSinceId(codeRes[i],startIdOriginRes[i], originIdRangeRes[i]+20));
             similarList.add(stockSimilar);
         }
-        /**对比对象*/
-        StockSimilar stockSimilar = new StockSimilar();
-        stockSimilar.setCode(stockMap.getCode());
-        stockSimilar.setSimilar(1.0);
-        stockSimilar.setName(stockInfoService.getOneByCode(stockMap.getCode()).getName());
-        stockSimilar.setTradeData(tradeDataService.listDescByTradeDate(stockMap.getCode(),stockMap.getRange()));
-        stockSimilar.setLastDate(stockSimilar.getTradeData().get(0).getTradeDate());
-        stockSimilar.setStartDate(stockSimilar.getTradeData().get(stockMap.getRange()-1).getTradeDate());
-        similarList.add(0,stockSimilar);
+
+        //绘图测试结果
+        TestProcessedRes testProcessedRes = new TestProcessedRes();
+        testProcessedRes.setSimilarities(similarities);
+        testProcessedRes.setStartIDRes(startIDRes);
+        testProcessedRes.setTableNameRes(tableNameRes);
+        System.out.println(testProcessedRes);
+        System.out.println(matchLen);
+        endTime=System.currentTimeMillis(); //获取结束时间
+        System.out.println("程序运行时间： "+(endTime-startTime)+"ms");
+        System.out.println(matchSum);
         return similarList;
     }
 

@@ -10,12 +10,12 @@ import java.util.List;
 
 public interface ProcessedTableService extends IService<ProcessedTable> {
     /**get list By table_name */
-     ArrayList<ProcessedTable> list(String table_name);
+    ArrayList<ProcessedTable> list(String table_name);
 
-     ArrayList<String> listHS300();
+    ArrayList<String> listHS300();
 
-     ArrayList<ProcessedTable> listDescById(String table_name);
+    ArrayList<ProcessedTable> listDescById(String table_name);
 
 
-     List<StockSimilar> getKLineSimilar(StockMap stockMap);
+    List<StockSimilar> getKLineSimilar(StockMap stockMap);
 }

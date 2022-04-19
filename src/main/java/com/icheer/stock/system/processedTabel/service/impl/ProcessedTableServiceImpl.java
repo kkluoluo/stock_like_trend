@@ -153,6 +153,9 @@ public class ProcessedTableServiceImpl extends ServiceImpl<ProcessedTableMapper,
             // 循环次数
             matchSum += indexMatchList.size();
             for (int startID : indexMatchList) {
+                if (tableName.equals(tsCode)&Math.abs(startID-startPointIndex)<matchLen){
+                    continue;
+                }
                 int pointLenMatch = listMatch.get(startID+matchLen-1).getCurPoint() - listMatch.get(startID).getIniPoint();
 
                 // 弧度相似度=(1-弧度差值的百分比)*日期长度的权重
@@ -194,7 +197,6 @@ public class ProcessedTableServiceImpl extends ServiceImpl<ProcessedTableMapper,
                     continue;
                 }
 
-                //Todo 还未删去输入的结果，由于输入结果的相似度一定是百分百，准备保存11个结果，输出后10个。
                 //保存相似度最高的10个结果
                 if (similarity <= similarities[9]) {
                     continue;
@@ -258,6 +260,10 @@ public class ProcessedTableServiceImpl extends ServiceImpl<ProcessedTableMapper,
         }
 
         //绘图测试结果
+
+        for (int i = 0; i <tableNameRes.length ; i++) {
+            tableNameRes[i] = "\"" + tableNameRes[i] + "\"";
+        }
         TestProcessedRes testProcessedRes = new TestProcessedRes();
         testProcessedRes.setSimilarities(similarities);
         testProcessedRes.setStartIDRes(startIDRes);

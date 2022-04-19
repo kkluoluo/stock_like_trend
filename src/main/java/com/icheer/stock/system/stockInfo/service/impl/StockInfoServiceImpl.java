@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -44,6 +45,11 @@ public class StockInfoServiceImpl extends ServiceImpl<StockInfoMapper, StockInfo
         stockQuery.eq("deleted",0);
         stockQuery.eq("csi300_flag","1");
         return  stockInfoMapper.selectList(stockQuery);
+    }
+
+    @Override
+    public ArrayList<StockInfo> getCodeAndName() {
+        return stockInfoMapper.getCodeAndName();
     }
 }
 

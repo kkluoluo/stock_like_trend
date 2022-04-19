@@ -22,12 +22,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.*;
 
-@Controller
+@RestController
 @RequestMapping("/test")
 public class indexController {
 
@@ -56,9 +57,8 @@ public class indexController {
     @RequestMapping("/getSimilarRes_TEST")
     public Result getSimilarRes(@RequestBody StockMap stockMap) {
         List<StockSimilar> similarList = processedTableService.getKLineSimilar(stockMap);
-        for( StockSimilar similar_kL : similarList)
-        {
-
+        ArrayList<Test> testRes = new ArrayList<>();
+        for( StockSimilar similar_kL : similarList) {
             Test t = new Test();
             t.setK(similar_kL.getSimilar());
             t.setCode(stockInfoService.getOneByCode(similar_kL.getCode()).getTsCode().toLowerCase());
@@ -67,8 +67,9 @@ public class indexController {
             t.setAnCode(stockMap.getCode());
             t.setMo(String.valueOf(stockMap.getRange()));
             t.setFlag("h");
-            testService.save(t);
+            testRes.add(t);
         }
+        testService.saveBatch(testRes);
         return new Result(200, "", similarList);
     }
 

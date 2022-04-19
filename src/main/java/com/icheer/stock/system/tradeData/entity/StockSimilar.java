@@ -12,7 +12,8 @@ public class StockSimilar{
     private  String name;
     private  double similar;
     private  double change;
-    private List<TradeData> tradeData;
-    private LocalDate lastDate;
     private LocalDate startDate;
+    private LocalDate lastDate;
+    private List<TradeData> tradeData;
+
 }

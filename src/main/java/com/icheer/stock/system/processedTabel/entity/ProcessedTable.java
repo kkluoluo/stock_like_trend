@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.security.PrivilegedExceptionAction;
 
 @Data
 public class ProcessedTable implements Serializable {
@@ -18,4 +19,5 @@ public class ProcessedTable implements Serializable {
     private Integer pointDelta;
     private String ma5TrendLetter;
     private Double ma5Radian;
+    private String ma5TrendLetterRefine;
 }

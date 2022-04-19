@@ -5,6 +5,7 @@ import com.icheer.stock.system.processedTabel.entity.ProcessedTable;
 import com.icheer.stock.system.processedTabel.entity.TestProcessedRes;
 import com.icheer.stock.system.processedTabel.mapper.ProcessedTableMapper;
 import com.icheer.stock.system.processedTabel.service.ProcessedTableService;
+import com.icheer.stock.system.stockInfo.entity.StockInfo;
 import com.icheer.stock.system.stockInfo.service.StockInfoService;
 import com.icheer.stock.system.tradeData.entity.StockSimilar;
 import com.icheer.stock.system.tradeData.entity.TradeData;
@@ -13,10 +14,10 @@ import com.icheer.stock.util.StockMap;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.stream.Collectors;
 
 @Service
 public class ProcessedTableServiceImpl extends ServiceImpl<ProcessedTableMapper, ProcessedTable> implements ProcessedTableService {
@@ -86,6 +87,18 @@ public class ProcessedTableServiceImpl extends ServiceImpl<ProcessedTableMapper,
         }
         // 匹配字符串长度
         int matchLen = ma5TrendLetter.length();
+
+        //aShares代码以及中文名列表
+        ArrayList<StockInfo> aSharesInfo = stockInfoService.getCodeAndName();
+
+        //设置输入code对应的原始数据
+        StockSimilar stockSimilarOrigin = new StockSimilar();
+        stockSimilarOrigin.setSimilar(1);
+        stockSimilarOrigin.setCode(stockMap.getCode());
+        stockSimilarOrigin.setName(aSharesInfo.stream().filter(s -> s.getCode().equals(stockMap.getCode())).collect(Collectors.toList()).get(0).getName());
+        stockSimilarOrigin.setTradeData(tradeDataService.getTradeSinceId(stockMap.getCode(),listProcessedTable.get(startPointIndex).getIniPoint(), listProcessedTable.get(listProcessedTable.size()-1).getCurPoint()-listProcessedTable.get(startPointIndex).getIniPoint()+stockMap.getPreRange()));
+        setStockSimilarInfo(stockSimilarOrigin);
+
 
         //CSI300代码列表
         ArrayList<String> listHS300 = listHS300();
@@ -173,6 +186,11 @@ public class ProcessedTableServiceImpl extends ServiceImpl<ProcessedTableMapper,
                 // 最终相似度计算
                 double similarity = (weight * radianSimilar) + (((1 - weight) * deltaSimilar) / matchLen);
 
+                //跳过自身结果
+                if(similarity ==1){
+                    continue;
+                }
+
                 //Todo 还未删去输入的结果，由于输入结果的相似度一定是百分百，准备保存11个结果，输出后10个。
                 //保存相似度最高的10个结果
                 if (similarity <= similarities[9]) {
@@ -220,11 +238,14 @@ public class ProcessedTableServiceImpl extends ServiceImpl<ProcessedTableMapper,
         System.out.println("程序运行时间： "+(endTime-startTime)+"ms");
         //输出结果
         List<StockSimilar> similarList = new ArrayList<>();
+        similarList.add(stockSimilarOrigin);
         for (int i = 0; i < 10; i++) {
             StockSimilar stockSimilar = new StockSimilar();
             stockSimilar.setCode(codeRes[i]);
             stockSimilar.setSimilar(similarities[i]);
-            stockSimilar.setTradeData(tradeDataService.getTradeSinceId(codeRes[i],startIdOriginRes[i], originIdRangeRes[i]+20));
+            stockSimilar.setName(aSharesInfo.stream().filter(s -> s.getCode().equals(stockSimilar.getCode())).collect(Collectors.toList()).get(0).getName());
+            stockSimilar.setTradeData(tradeDataService.getTradeSinceId(codeRes[i],startIdOriginRes[i], originIdRangeRes[i]+stockMap.getPreRange()));
+            setStockSimilarInfo(stockSimilar);
             similarList.add(stockSimilar);
         }
 
@@ -238,7 +259,16 @@ public class ProcessedTableServiceImpl extends ServiceImpl<ProcessedTableMapper,
         endTime=System.currentTimeMillis(); //获取结束时间
         System.out.println("程序运行时间： "+(endTime-startTime)+"ms");
         System.out.println(matchSum);
+
         return similarList;
+    }
+
+    private void setStockSimilarInfo(StockSimilar stockSimilar) {
+        TradeData startTradeData = stockSimilar.getTradeData().get(0);
+        TradeData lastTradeData = stockSimilar.getTradeData().get(stockSimilar.getTradeData().size()-1);
+        stockSimilar.setStartDate(startTradeData.getTradeDate());
+        stockSimilar.setLastDate(lastTradeData.getTradeDate());
+        stockSimilar.setChange((lastTradeData.getClose()-startTradeData.getClose())/startTradeData.getClose());
     }
 
 

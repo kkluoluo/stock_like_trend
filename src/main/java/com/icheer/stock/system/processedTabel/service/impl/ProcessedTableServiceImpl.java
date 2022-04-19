@@ -97,8 +97,11 @@ public class ProcessedTableServiceImpl extends ServiceImpl<ProcessedTableMapper,
         stockSimilarOrigin.setCode(stockMap.getCode());
         stockSimilarOrigin.setName(aSharesInfo.stream().filter(s -> s.getCode().equals(stockMap.getCode())).collect(Collectors.toList()).get(0).getName());
         stockSimilarOrigin.setTradeData(tradeDataService.getTradeSinceId(stockMap.getCode(),listProcessedTable.get(startPointIndex).getIniPoint(), listProcessedTable.get(listProcessedTable.size()-1).getCurPoint()-listProcessedTable.get(startPointIndex).getIniPoint()));
-        setStockSimilarInfo(stockSimilarOrigin);
-
+//        setStockSimilarInfo(stockSimilarOrigin);
+        TradeData startTradeDataOrigin = stockSimilarOrigin.getTradeData().get(0);
+        TradeData lastTradeDataOrigin = stockSimilarOrigin.getTradeData().get(stockSimilarOrigin.getTradeData().size()-1);
+        stockSimilarOrigin.setStartDate(startTradeDataOrigin.getTradeDate());
+        stockSimilarOrigin.setLastDate(lastTradeDataOrigin.getTradeDate());
 
         //CSI300代码列表
         ArrayList<String> listHS300 = listHS300();
@@ -245,7 +248,12 @@ public class ProcessedTableServiceImpl extends ServiceImpl<ProcessedTableMapper,
             stockSimilar.setSimilar(similarities[i]);
             stockSimilar.setName(aSharesInfo.stream().filter(s -> s.getCode().equals(stockSimilar.getCode())).collect(Collectors.toList()).get(0).getName());
             stockSimilar.setTradeData(tradeDataService.getTradeSinceId(codeRes[i],startIdOriginRes[i], originIdRangeRes[i]+stockMap.getPreRange()));
-            setStockSimilarInfo(stockSimilar);
+            TradeData startTradeData = stockSimilar.getTradeData().get(0);
+            TradeData lastTradeData = stockSimilar.getTradeData().get(stockSimilar.getTradeData().size()-1-stockMap.getPreRange());
+            TradeData preTradeData = stockSimilar.getTradeData().get(stockSimilar.getTradeData().size()-1);
+            stockSimilar.setStartDate(startTradeData.getTradeDate());
+            stockSimilar.setLastDate(lastTradeData.getTradeDate());
+            stockSimilar.setChange((preTradeData.getClose()-lastTradeData.getClose())/lastTradeData.getClose());
             similarList.add(stockSimilar);
         }
 
@@ -261,14 +269,6 @@ public class ProcessedTableServiceImpl extends ServiceImpl<ProcessedTableMapper,
         System.out.println(matchSum);
 
         return similarList;
-    }
-
-    private void setStockSimilarInfo(StockSimilar stockSimilar) {
-        TradeData startTradeData = stockSimilar.getTradeData().get(0);
-        TradeData lastTradeData = stockSimilar.getTradeData().get(stockSimilar.getTradeData().size()-1);
-        stockSimilar.setStartDate(startTradeData.getTradeDate());
-        stockSimilar.setLastDate(lastTradeData.getTradeDate());
-        stockSimilar.setChange((lastTradeData.getClose()-startTradeData.getClose())/startTradeData.getClose());
     }
 
 

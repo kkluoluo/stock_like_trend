@@ -96,7 +96,7 @@ public class ProcessedTableServiceImpl extends ServiceImpl<ProcessedTableMapper,
         stockSimilarOrigin.setSimilar(1);
         stockSimilarOrigin.setCode(stockMap.getCode());
         stockSimilarOrigin.setName(aSharesInfo.stream().filter(s -> s.getCode().equals(stockMap.getCode())).collect(Collectors.toList()).get(0).getName());
-        stockSimilarOrigin.setTradeData(tradeDataService.getTradeSinceId(stockMap.getCode(),listProcessedTable.get(startPointIndex).getIniPoint(), listProcessedTable.get(listProcessedTable.size()-1).getCurPoint()-listProcessedTable.get(startPointIndex).getIniPoint()+stockMap.getPreRange()));
+        stockSimilarOrigin.setTradeData(tradeDataService.getTradeSinceId(stockMap.getCode(),listProcessedTable.get(startPointIndex).getIniPoint(), listProcessedTable.get(listProcessedTable.size()-1).getCurPoint()-listProcessedTable.get(startPointIndex).getIniPoint()));
         setStockSimilarInfo(stockSimilarOrigin);
 
 

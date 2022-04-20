@@ -1,5 +1,6 @@
 package com.icheer.stock.system.tradeData.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.icheer.stock.system.stockInfo.entity.StockInfo;
 import com.icheer.stock.system.tradeData.entity.StockSimilar;
@@ -36,7 +37,7 @@ public interface TradeDataService  extends IService<TradeData> {
     public StockTradeResult getStockTradeResult(StockInfo stock);
 
     /**搜索BY code or name */
-    public List<StockTradeResult> searchStockTrades(StockMap stockMap , Long userId);
+    public IPage<StockTradeResult> searchStockTrades(StockMap stockMap , Long userId);
 
     /** 大盘交易数据 */
     public List<StockTradeResult> getCompositeIndex();

@@ -1,5 +1,7 @@
 package com.icheer.stock.controller.test;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.github.pagehelper.PageInfo;
 import com.icheer.stock.controller.test.testResult.entity.Test;
 import com.icheer.stock.controller.test.testResult.service.TestService;
 import com.icheer.stock.system.processedTabel.service.ProcessedTableService;
@@ -92,17 +94,14 @@ public class indexController extends  BaseController{
      */
     @RequestMapping("/search_stock")
     @ResponseBody
-    public Result search_stockByCode(@RequestBody StockMap stockMap  , PageDomain pageDomain){
+    public Result search_stockByCode(@RequestBody StockMap stockMap  ,PageDomain pageDomain){
         /**userLogger**/
-        pageDomain.setPageNum(1);
-        pageDomain.setPageSize(10);
-        startPage();
+
 
         /**分类搜索**/
-        List<StockTradeResult> stockTradeResults = tradeDataService.searchStockTrades(stockMap,Long.valueOf(1));
-        return new Result(200,"success",getDataTable(stockTradeResults));
+        IPage<StockTradeResult> stockTradeResults = tradeDataService.searchStockTrades(stockMap,Long.valueOf(1));
+        return new Result(200,"success",stockTradeResults);
     }
-
 
     /**
      * 个股相似走势分析----威尔逊相干法

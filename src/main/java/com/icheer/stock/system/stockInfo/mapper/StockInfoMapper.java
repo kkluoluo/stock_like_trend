@@ -28,8 +28,8 @@ public interface StockInfoMapper extends BaseMapper<StockInfo> {
     @SelectProvider(type= selectProvider.class,method="getTsByCode")
     public String  getTsByCode(String  code );
 
-    @SelectProvider(type= selectProvider.class,method="listByName")
-    public List<StockInfo> listByName(String  name );
+//    @SelectProvider(type= selectProvider.class,method="listByName")
+//    public List<StockInfo> listByName(String  name );
 
     @Select("select code, name from a_shares")
     public ArrayList<StockInfo> getCodeAndName();

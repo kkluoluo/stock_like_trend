@@ -1,11 +1,14 @@
 package com.icheer.stock.system.stockInfo.service.impl;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import com.icheer.stock.system.stockInfo.entity.StockInfo;
 import com.icheer.stock.system.stockInfo.mapper.StockInfoMapper;
 import com.icheer.stock.system.stockInfo.service.StockInfoService;
 import com.icheer.stock.util.ExcludeEmptyQueryWrapper;
+import com.icheer.stock.util.PageDomain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -23,11 +26,12 @@ public class StockInfoServiceImpl extends ServiceImpl<StockInfoMapper, StockInfo
     private  StockInfoMapper stockInfoMapper;
 
     /** name模糊查找 */
-    public  List<StockInfo>  listByName(String name){
+    public  IPage<StockInfo>  listByName(String name,  IPage<StockInfo> stockInfoIPage ){
         ExcludeEmptyQueryWrapper<StockInfo> stockQuery = new ExcludeEmptyQueryWrapper<>();
         stockQuery.eq("deleted",0);
         stockQuery.like("name",name);
-        return  stockInfoMapper.selectList(stockQuery);
+
+        return  stockInfoMapper.selectPage(stockInfoIPage,stockQuery);
     }
 
     /**getOneByCode */

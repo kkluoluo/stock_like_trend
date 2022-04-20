@@ -1,7 +1,10 @@
 package com.icheer.stock.system.tradeData.service.impl;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
+import com.github.pagehelper.PageHelper;
 import com.icheer.stock.system.stockInfo.service.StockInfoService;
 import com.icheer.stock.system.tradeData.entity.Id_Values;
 import com.icheer.stock.system.tradeData.entity.StockSimilar;
@@ -11,9 +14,7 @@ import com.icheer.stock.system.tradeData.entity.TradeData;
 import com.icheer.stock.system.tradeData.mapper.TradeDataMapper;
 import com.icheer.stock.system.tradeData.service.TradeDataService;
 import com.icheer.stock.system.userHistory.service.UserHistoryService;
-import com.icheer.stock.util.ExcludeEmptyQueryWrapper;
-import com.icheer.stock.util.StockMap;
-import com.icheer.stock.util.StockTradeResult;
+import com.icheer.stock.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,9 @@ public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData
 
     @Autowired
     private  TradeDataMapper tradeDataMapper;
+    @Autowired
+    private StockInfoService stockInfoService;
+
     @Autowired
     private StockInfoMapper stockInfoMapper;
 
@@ -83,22 +87,43 @@ public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData
 
     /**搜索BY code or name */
     @Override
-    public List<StockTradeResult> searchStockTrades(StockMap stockMap, Long userId){
+    public IPage<StockTradeResult> searchStockTrades(StockMap stockMap, Long userId){
 
         List<StockTradeResult> stockTradeResults = new ArrayList<>();
+        IPage<StockTradeResult>  tradeResultIPage = new Page<>();
         /**分类搜索**/
-        if (stockMap.getCode()!=null & stockMap.getCode()!="")
-        {
-            userHistoryService.setSearchHistory(Integer.valueOf(userId.toString()),stockMap.getCode());
-            StockInfo stock= stockInfoMapper.getByCode(stockMap.getCode());
-            if(stock != null)
-            {
-                stockTradeResults.add(getStockTradeResult(stock));
-            }
-        }else
-        {
 
-            List<StockInfo> stocks= stockInfoMapper.listByName(stockMap.getName());
+//        if (stockMap.getCode()!=null & stockMap.getCode()!="")
+//        {
+//            userHistoryService.setSearchHistory(Integer.valueOf(userId.toString()),stockMap.getCode());
+//            StockInfo stock= stockInfoService.getOneByCode(stockMap.getCode());
+//            if(stock != null)
+//            {
+//                stockTradeResults.add(getStockTradeResult(stock));
+//            }
+//        }else
+//        {
+            IPage<StockInfo>  page = new Page<>();
+            page.setSize(stockMap.getPageSize());
+            page.setCurrent(stockMap.getPageNum());
+            ExcludeEmptyQueryWrapper<StockInfo> stockQuery = new ExcludeEmptyQueryWrapper<>();
+            stockQuery.eq("deleted",0);
+
+            if (stockMap.getCode()!=null & stockMap.getCode()!="")
+            {
+                stockQuery.like("code",stockMap.getCode());
+            } else
+            {
+                stockQuery.like("name",stockMap.getName());
+            }
+
+
+            IPage<StockInfo> stockInfoIPage = stockInfoMapper.selectPage(page,stockQuery);
+            tradeResultIPage.setPages(stockInfoIPage.getPages());
+            tradeResultIPage.setTotal(stockInfoIPage.getTotal());
+            tradeResultIPage.setSize(stockInfoIPage.getSize());
+            tradeResultIPage.setCurrent(stockInfoIPage.getCurrent());
+            List<StockInfo> stocks= stockInfoIPage.getRecords();
             userHistoryService.setSearchNameHistory(Integer.valueOf(userId.toString()),stockMap.getName());
             if (stocks != null)
             {
@@ -107,8 +132,10 @@ public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData
                     stockTradeResults.add(getStockTradeResult(one));
                 }
             }
-        }
-        return stockTradeResults;
+
+//        }
+        tradeResultIPage.setRecords(stockTradeResults);
+        return tradeResultIPage;
     }
 
 
@@ -149,7 +176,7 @@ public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData
     @Override
     public  List<StockSimilar> getSimilar_Analysis(String code , int range,int pre_range, String key){
         String  cp_table = tableName_code(code);
-        String  cp_name  = stockInfoMapper.getByCode(code).getName();
+        String  cp_name  = stockInfoService.getOneByCode(code).getName();
         List<Double>  cp_ls= tradeDataMapper.getKeyList(cp_table,key,range);
         List <StockInfo> CSI300list= stockInfoMapper.getCsi300_ts_code_name();
         Integer total_ranges = 600;
@@ -217,7 +244,7 @@ public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData
         Integer cp_last_id= tradeDataMapper.listDescByTradeDate(cp_table,1).get(0).getId();
         List<TradeData> cpTradeDataList = tradeDataMapper.getTradeSinceId(cp_table,cp_last_id-range,range);
         similar_cp.setLastDate(tradeDataMapper.listDescByTradeDate(cp_table,1).get(0).getTradeDate());
-        similar_cp.setStartDate(similar_cp.getTradeData().get(0).getTradeDate());
+        similar_cp.setStartDate(cpTradeDataList.get(0).getTradeDate());
         /**----空数据添加----*/
         for (int day=1;day<=pre_range ;day++)
         {
@@ -345,6 +372,17 @@ public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData
         return table_name;
     }
 
+    protected void startPage()
+    {
+        PageDomain pageDomain = TableSupport.buildPageRequest();
+        Integer pageNum = pageDomain.getPageNum();
+        Integer pageSize = pageDomain.getPageSize();
+        if (StringUtils.isNotNull(pageNum) && StringUtils.isNotNull(pageSize))
+        {
+            String orderBy = SqlUtil.escapeOrderBySql(pageDomain.getOrderBy());
+            PageHelper.startPage(pageNum, pageSize, orderBy);
+        }
+    }
 
 }
 

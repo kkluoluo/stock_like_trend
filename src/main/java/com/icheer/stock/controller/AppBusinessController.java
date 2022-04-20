@@ -1,5 +1,6 @@
 package com.icheer.stock.controller;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.icheer.stock.system.processedTabel.service.ProcessedTableService;
 import com.icheer.stock.system.stockInfo.entity.StockInfo;
 import com.icheer.stock.system.stockInfo.service.StockInfoService;
@@ -118,11 +119,11 @@ public class AppBusinessController extends BaseController{
     @ResponseBody
     public Result search_stockByCode(@RequestBody StockMap stockMap  ,PageDomain pageDomain){
         /**userLogger**/
-        startPage();
+
         Long userId = (Long) SecurityUtils.getSubject().getSession().getAttribute("userId");
         /**分类搜索**/
-        List<StockTradeResult> stockTradeResults = tradeDataService.searchStockTrades(stockMap,userId);
-        return new Result(200,"success",getDataTable(stockTradeResults));
+        IPage<StockTradeResult> stockTradeResults = tradeDataService.searchStockTrades(stockMap,userId);
+        return new Result(200,"success",stockTradeResults);
     }
 
 

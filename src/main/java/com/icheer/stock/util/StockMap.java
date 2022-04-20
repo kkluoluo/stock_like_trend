@@ -16,4 +16,8 @@ public class StockMap {
 
     private String   model = "pearson";
 
+    private Integer pageNum =1;
+
+    private   Integer pageSize =10;
+
 }

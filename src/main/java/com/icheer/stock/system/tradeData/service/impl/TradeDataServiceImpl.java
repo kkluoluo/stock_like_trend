@@ -216,6 +216,8 @@ public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData
         similar_cp.setName(cp_name);
         Integer cp_last_id= tradeDataMapper.listDescByTradeDate(cp_table,1).get(0).getId();
         List<TradeData> cpTradeDataList = tradeDataMapper.getTradeSinceId(cp_table,cp_last_id-range,range);
+        similar_cp.setLastDate(tradeDataMapper.listDescByTradeDate(cp_table,1).get(0).getTradeDate());
+        similar_cp.setStartDate(similar_cp.getTradeData().get(0).getTradeDate());
         /**----空数据添加----*/
         for (int day=1;day<=pre_range ;day++)
         {
@@ -224,8 +226,7 @@ public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData
           cpTradeDataList.add(preTradeData);
         }
         similar_cp.setTradeData(cpTradeDataList);
-        similar_cp.setLastDate(similar_cp.getTradeData().get(0).getTradeDate());
-        similar_cp.setStartDate(similar_cp.getTradeData().get(range-1).getTradeDate());
+
         similarList.add(0,similar_cp);
         System.out.println(k_list);
         return similarList;

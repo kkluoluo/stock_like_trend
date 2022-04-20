@@ -24,7 +24,7 @@ public class ProcessedTableProvider {
 //        }}.toString();
 //    }
     public String list(String table_name){
-        return "select id,iniPoint,curPoint,pointDelta,ma5TrendLetter,ma5Radian from "+ table_name;
+        return "select id,iniPoint,curPoint,pointDelta,ma5TrendLetter,ma5Radian, ma5TrendLetterRefine from "+ table_name;
     }
     public String listDescById(String table_name){
         return "select * from "+ table_name + " order by id desc ";

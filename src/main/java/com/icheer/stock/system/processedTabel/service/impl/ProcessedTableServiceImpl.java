@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.stream.Collectors;
@@ -76,7 +77,7 @@ public class ProcessedTableServiceImpl extends ServiceImpl<ProcessedTableMapper,
 
         StringBuilder ma5TrendLetter = new StringBuilder();
         double[] ma5Radian = new double[endPointIndex-startPointIndex+1];
-        double[] pointDelta = new double[endPointIndex-startPointIndex+1];
+        int[] pointDelta = new int[endPointIndex-startPointIndex+1];
         //遍历processed表获取特征数据
         for (int i = startPointIndex, j = 0; i < endPointIndex + 1; i++, j++) {
 
@@ -96,8 +97,13 @@ public class ProcessedTableServiceImpl extends ServiceImpl<ProcessedTableMapper,
         stockSimilarOrigin.setSimilar(1);
         stockSimilarOrigin.setCode(stockMap.getCode());
         stockSimilarOrigin.setName(aSharesInfo.stream().filter(s -> s.getCode().equals(stockMap.getCode())).collect(Collectors.toList()).get(0).getName());
-        stockSimilarOrigin.setTradeData(tradeDataService.getTradeSinceId(stockMap.getCode(),listProcessedTable.get(startPointIndex).getIniPoint(), listProcessedTable.get(listProcessedTable.size()-1).getCurPoint()-listProcessedTable.get(startPointIndex).getIniPoint()));
-//        setStockSimilarInfo(stockSimilarOrigin);
+        List<TradeData> tradeDataOrigin = tradeDataService.getTradeSinceId(stockMap.getCode(), listProcessedTable.get(startPointIndex).getIniPoint(), listProcessedTable.get(listProcessedTable.size() - 1).getCurPoint() - listProcessedTable.get(startPointIndex).getIniPoint());
+        for (int i = 0; i < stockMap.getPreRange(); i++) {
+            TradeData tradeData = new TradeData();
+            tradeData.setTradeDate(tradeDataOrigin.get(tradeDataOrigin.size()-1).getTradeDate().plusDays(1));
+            tradeDataOrigin.add(tradeData);
+        }
+        stockSimilarOrigin.setTradeData(tradeDataOrigin);
         TradeData startTradeDataOrigin = stockSimilarOrigin.getTradeData().get(0);
         TradeData lastTradeDataOrigin = stockSimilarOrigin.getTradeData().get(stockSimilarOrigin.getTradeData().size()-1);
         stockSimilarOrigin.setStartDate(startTradeDataOrigin.getTradeDate());
@@ -126,6 +132,7 @@ public class ProcessedTableServiceImpl extends ServiceImpl<ProcessedTableMapper,
 
         //测试循环次数
         int matchSum = 0;
+        //todo 改为全表检索
         for (int i = 0; i < 300; i++) {
             //CSI300对应表名
             String tableName = listHS300.get(i).toLowerCase().replace('.', '_');
@@ -188,7 +195,7 @@ public class ProcessedTableServiceImpl extends ServiceImpl<ProcessedTableMapper,
                     }
                 }
                 // 权重分配
-                double weight = 0.7;
+                double weight = 0.5;
                 // 最终相似度计算
                 double similarity = (weight * radianSimilar) + (((1 - weight) * deltaSimilar) / matchLen);
 
@@ -244,7 +251,10 @@ public class ProcessedTableServiceImpl extends ServiceImpl<ProcessedTableMapper,
         //输出结果
         List<StockSimilar> similarList = new ArrayList<>();
         similarList.add(stockSimilarOrigin);
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < codeRes.length; i++) {
+            if (codeRes[i]==null){
+                break;
+            }
             StockSimilar stockSimilar = new StockSimilar();
             stockSimilar.setCode(codeRes[i]);
             stockSimilar.setSimilar(similarities[i]);
@@ -268,7 +278,10 @@ public class ProcessedTableServiceImpl extends ServiceImpl<ProcessedTableMapper,
         testProcessedRes.setSimilarities(similarities);
         testProcessedRes.setStartIDRes(startIDRes);
         testProcessedRes.setTableNameRes(tableNameRes);
-        System.out.println(testProcessedRes);
+        System.out.println(Arrays.toString(testProcessedRes.getSimilarities()));
+        System.out.println(Arrays.toString(testProcessedRes.getTableNameRes()));
+        System.out.println(Arrays.toString(testProcessedRes.getStartIDRes()));
+
         System.out.println(matchLen);
         endTime=System.currentTimeMillis(); //获取结束时间
         System.out.println("程序运行时间： "+(endTime-startTime)+"ms");

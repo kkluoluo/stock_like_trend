@@ -17,6 +17,7 @@ import com.icheer.stock.util.StockTradeResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.relational.core.sql.In;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -213,7 +214,16 @@ public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData
         similar_cp.setSimilar(1.0);
         similar_cp.setCode(code);
         similar_cp.setName(cp_name);
-        similar_cp.setTradeData(tradeDataMapper.listDescByTradeDate(cp_table,range));
+        Integer cp_last_id= tradeDataMapper.listDescByTradeDate(cp_table,1).get(0).getId();
+        List<TradeData> cpTradeDataList = tradeDataMapper.getTradeSinceId(cp_table,cp_last_id-range,range);
+        /**----空数据添加----*/
+        for (int day=1;day<=pre_range ;day++)
+        {
+          TradeData  preTradeData = tradeDataMapper.listDescByTradeDate(cp_table,1).get(0);
+          preTradeData.setTradeDate(tradeDataMapper.listDescByTradeDate(cp_table,1).get(0).getTradeDate().plusDays(day));
+          cpTradeDataList.add(preTradeData);
+        }
+        similar_cp.setTradeData(cpTradeDataList);
         similar_cp.setLastDate(similar_cp.getTradeData().get(0).getTradeDate());
         similar_cp.setStartDate(similar_cp.getTradeData().get(range-1).getTradeDate());
         similarList.add(0,similar_cp);

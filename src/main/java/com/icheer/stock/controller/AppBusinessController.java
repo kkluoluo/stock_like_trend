@@ -116,8 +116,9 @@ public class AppBusinessController extends BaseController{
      */
     @RequestMapping("/search_stock")
     @ResponseBody
-    public Result search_stockByCode(@RequestBody StockMap stockMap ){
+    public Result search_stockByCode(@RequestBody StockMap stockMap  ,PageDomain pageDomain){
         /**userLogger**/
+        startPage();
         Long userId = (Long) SecurityUtils.getSubject().getSession().getAttribute("userId");
         /**分类搜索**/
         List<StockTradeResult> stockTradeResults = tradeDataService.searchStockTrades(stockMap,userId);

@@ -43,7 +43,7 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
 
             try{
                 getSubject(request, response).login(token);
-                System.out.println(getAuthzHeader(request));
+//                System.out.println(getAuthzHeader(request));
                 return   true;
             }catch (Exception e )
             {

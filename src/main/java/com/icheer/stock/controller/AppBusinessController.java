@@ -1,6 +1,7 @@
 package com.icheer.stock.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.icheer.stock.framework.aop.NoRepeatSubmit;
 import com.icheer.stock.system.processedTabel.service.ProcessedTableService;
 import com.icheer.stock.system.stockInfo.entity.StockInfo;
 import com.icheer.stock.system.stockInfo.service.StockInfoService;
@@ -117,6 +118,7 @@ public class AppBusinessController extends BaseController{
      */
     @RequestMapping("/search_stock")
     @ResponseBody
+    @NoRepeatSubmit
     public Result search_stockByCode(@RequestBody StockMap stockMap  ,PageDomain pageDomain){
         /**userLogger**/
 
@@ -135,6 +137,7 @@ public class AppBusinessController extends BaseController{
      */
     @RequestMapping("/stock_analysis")
     @ResponseBody
+    @NoRepeatSubmit
     public Result stock_analysis(@RequestBody StockMap stockMap) throws IOException
     {
         Long userId = (Long) SecurityUtils.getSubject().getSession().getAttribute("userId");

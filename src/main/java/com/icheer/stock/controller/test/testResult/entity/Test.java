@@ -10,6 +10,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @TableName("test_result")
+
 @ApiModel(value ="test_result",description = "验证后果表，用户存储结果便于画图")
 public class Test {
 

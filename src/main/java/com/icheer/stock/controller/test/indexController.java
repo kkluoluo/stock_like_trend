@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.github.pagehelper.PageInfo;
 import com.icheer.stock.controller.test.testResult.entity.Test;
 import com.icheer.stock.controller.test.testResult.service.TestService;
+import com.icheer.stock.framework.aop.NoRepeatSubmit;
 import com.icheer.stock.system.processedTabel.service.ProcessedTableService;
 import com.icheer.stock.system.stockInfo.mapper.StockInfoMapper;
 import com.icheer.stock.system.tradeData.entity.Id_Values;
@@ -111,6 +112,7 @@ public class indexController extends  BaseController{
      */
     @RequestMapping("/stock_analysis")
     @ResponseBody
+    @NoRepeatSubmit
     public Result stock_analysis(@RequestBody StockMap stockMap) throws IOException
     {
 

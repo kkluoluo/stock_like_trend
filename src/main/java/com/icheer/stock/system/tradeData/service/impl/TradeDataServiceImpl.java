@@ -124,7 +124,7 @@ public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData
             tradeResultIPage.setSize(stockInfoIPage.getSize());
             tradeResultIPage.setCurrent(stockInfoIPage.getCurrent());
             List<StockInfo> stocks= stockInfoIPage.getRecords();
-            userHistoryService.setSearchNameHistory(Integer.valueOf(userId.toString()),stockMap.getName());
+            userHistoryService.setSearchHistory(Integer.valueOf(userId.toString()),stockMap.getName()+"_"+stockMap.getCode());
             if (stocks != null)
             {
                 for(StockInfo one:stocks)

@@ -78,14 +78,18 @@ public class ProcessedTableServiceImpl extends ServiceImpl<ProcessedTableMapper,
         StringBuilder ma5TrendLetter = new StringBuilder();
         double[] ma5Radian = new double[endPointIndex-startPointIndex+1];
         int[] pointDelta = new int[endPointIndex-startPointIndex+1];
+        double[] ma5Delta = new double[endPointIndex-startPointIndex+1];
         //遍历processed表获取特征数据
         for (int i = startPointIndex, j = 0; i < endPointIndex + 1; i++, j++) {
 
             ProcessedTable processedTable = listProcessedTable.get(i-1);
             ma5Radian[j] = processedTable.getMa5Radian();
             pointDelta[j] = processedTable.getPointDelta();
+            ma5Delta[j] = processedTable.getMa5Delta();
             ma5TrendLetter.append(processedTable.getMa5TrendLetter());
         }
+        // 获取输入数据的特征值
+        String featureOrigin = getFeature(ma5Delta);
         // 匹配字符串长度
         int matchLen = ma5TrendLetter.length();
 
@@ -124,7 +128,8 @@ public class ProcessedTableServiceImpl extends ServiceImpl<ProcessedTableMapper,
         //测试用结果
         String[] tableNameRes = new String[10];
         int[] startIDRes = new int[10];
-
+        double[] radianRes = new double[10];
+        double[] ratioRes = new double[10];
 
         //计时
         long endTime=System.currentTimeMillis(); //获取结束时间
@@ -143,6 +148,7 @@ public class ProcessedTableServiceImpl extends ServiceImpl<ProcessedTableMapper,
             int arraySize = listMatch.size();
             double[] ma5RadianMatch = new double[arraySize];
             double[] pointDeltaMatch = new double[arraySize];
+            double[] ma5DeltaMatch = new double[arraySize];
             StringBuilder letterMatch = new StringBuilder();
             //遍历processed表获取特征数据
             for (int j = 0; j < arraySize; j++) {
@@ -152,14 +158,29 @@ public class ProcessedTableServiceImpl extends ServiceImpl<ProcessedTableMapper,
                 }
                 ma5RadianMatch[j] = processedTable.getMa5Radian();
                 pointDeltaMatch[j] = processedTable.getPointDelta();
+                ma5DeltaMatch[j] = processedTable.getMa5Delta();
                 letterMatch.append(processedTable.getMa5TrendLetter());
             }
             // 当前表 匹配的 索引集合 startIndex(ID)
             ArrayList<Integer> indexMatchList = searchAllIndex(letterMatch.toString(),ma5TrendLetter.toString());
 
-            // 循环次数
-            matchSum += indexMatchList.size();
+            // 对筛选出来的letter匹配段落，再进行一次总体趋势的的筛选
+            // ”UD“：极大值在前    ”DU“：极小值在前
+            ArrayList<Integer> matchRes = new ArrayList<>();
             for (int startID : indexMatchList) {
+                double[] ma5DeltaMatchList = Arrays.copyOfRange(ma5DeltaMatch, startID, startID + matchLen - 1);
+                String featureMatch = getFeature(ma5DeltaMatchList);
+                if (featureMatch.equals(featureOrigin)) {
+                    matchRes.add(startID);
+                }
+            }
+            if (matchRes.size()==0){
+                continue;
+            }
+
+            // 循环次数，也是两次筛选后的结果总数。
+            matchSum += matchRes.size();
+            for (int startID : matchRes) {
                 if (tableName.equals(tsCode)&Math.abs(startID-startPointIndex)<matchLen){
                     continue;
                 }
@@ -184,20 +205,36 @@ public class ProcessedTableServiceImpl extends ServiceImpl<ProcessedTableMapper,
                 deltaRatioExcept = deltaRatioExcept / matchLen;
                 //日期长度成比例的程度
                 double deltaSimilar = 0;
+                int deltaFlag = 0;
+                double errorLength = 0;
                 for (int k = 0; k < matchLen; k++) {
                     // 日期长度成比例的比例偏离值 = |(每段日期长度的比值-日期长度成比例的比例期望)|/日期长度成比例的比例期望
                     double deltaDiffRatio = Math.abs(pointDeltaMatch[startID + k] / pointDelta[k] - deltaRatioExcept) / deltaRatioExcept;
-                    //Todo 由于比例偏离值无上界，人为设置偏离值大于2时，日期长度不成比例，数值待测试改进。
+
+                    //消除个别相差过大值的影响，
+                    if (pointDeltaMatch[startID + k] / pointDelta[k]/deltaRatioExcept > 2 ){
+                        deltaFlag += 1;
+                        errorLength += pointDeltaMatch[startID + k];
+                        continue;
+                    }
+
                     if (deltaDiffRatio > 2) {
                         deltaSimilar += 0;
                     } else {
-                        deltaSimilar += 1 - deltaDiffRatio;
+                        deltaSimilar += Math.abs(1 - deltaDiffRatio)*pointDeltaMatch[startID + k]/pointLenMatch;
                     }
+                }
+                // deltaFlag范围设置 趋势段数的十分之一
+                if (deltaFlag>(matchLen+9)/10){
+                    continue;
+                } else {
+                    // 降低个别值差距过大的相似度
+                    deltaSimilar =(1 - Math.sqrt(errorLength/pointLenMatch))*deltaSimilar;
                 }
                 // 权重分配
                 double weight = 0.5;
                 // 最终相似度计算
-                double similarity = (weight * radianSimilar) + (((1 - weight) * deltaSimilar) / matchLen);
+                double similarity = (weight * radianSimilar) + ((1 - weight) * deltaSimilar);
 
                 //跳过自身结果
                 if(similarity ==1){
@@ -218,18 +255,22 @@ public class ProcessedTableServiceImpl extends ServiceImpl<ProcessedTableMapper,
                             startIdOriginRes[k + 1] = startIdOriginRes[k];
                             originIdRangeRes[k+1] = originIdRangeRes[k];
 
-                            //测试用tableName
+                            //测试用
                             tableNameRes[k + 1] = tableNameRes[k];
                             startIDRes[k + 1] = startIDRes[k];
+                            radianRes[k + 1] = radianRes[k];
+                            ratioRes[k + 1] = ratioRes[k];
                         }
                         similarities[k] = similarity;
                         codeRes[k] = tableName.substring(0,6);
                         startIdOriginRes[k] = listMatch.get(startID).getIniPoint();
                         originIdRangeRes[k] = listMatch.get(startID + matchLen -1).getCurPoint() - startIdOriginRes[k];
-                        //测试用tableName
+
+                        //测试用
                         tableNameRes[k] = tableName;
                         startIDRes[k] = startID + 1;
-
+                        radianRes[k] = radianSimilar;
+                        ratioRes[k] = deltaSimilar;
                         flag = false;
                         break;
                     }
@@ -240,9 +281,13 @@ public class ProcessedTableServiceImpl extends ServiceImpl<ProcessedTableMapper,
                     startIdOriginRes[9] = listMatch.get(startID).getIniPoint();
 
                     originIdRangeRes[9] = listMatch.get(startID + matchLen -1).getCurPoint() - startIdOriginRes[9];
-                    //测试用tableName
+
+
+                    //测试用
                     tableNameRes[9] = tableName;
                     startIDRes[9] = startID + 1;
+                    radianRes[9] = radianSimilar;
+                    ratioRes[9] = deltaSimilar;
                 }
             }
         }
@@ -270,18 +315,29 @@ public class ProcessedTableServiceImpl extends ServiceImpl<ProcessedTableMapper,
         }
 
         //绘图测试结果
-
         for (int i = 0; i <tableNameRes.length ; i++) {
             tableNameRes[i] = "\"" + tableNameRes[i] + "\"";
         }
         TestProcessedRes testProcessedRes = new TestProcessedRes();
-        testProcessedRes.setSimilarities(similarities);
-        testProcessedRes.setStartIDRes(startIDRes);
-        testProcessedRes.setTableNameRes(tableNameRes);
-        System.out.println(Arrays.toString(testProcessedRes.getSimilarities()));
-        System.out.println(Arrays.toString(testProcessedRes.getTableNameRes()));
-        System.out.println(Arrays.toString(testProcessedRes.getStartIDRes()));
+        double[] resSimilar = Arrays.copyOf(similarities, 11);
+        System.arraycopy(resSimilar, 0, resSimilar, 1, resSimilar.length - 1);
+        resSimilar[0] = 1;
 
+        int[] resStartID = Arrays.copyOf(startIDRes, 11);
+        System.arraycopy(resStartID, 0, resStartID, 1, resStartID.length - 1);
+        resStartID[0] = startPointIndex;
+
+        String[] restableName = Arrays.copyOf(tableNameRes, 11);
+        System.arraycopy(restableName, 0, restableName, 1, restableName.length - 1);
+        restableName[0] = "\"" + tsCode + "\"";
+        testProcessedRes.setSimilarities(resSimilar);
+        testProcessedRes.setStartIDRes(resStartID);
+        testProcessedRes.setTableNameRes(restableName);
+        System.out.println(Arrays.toString(testProcessedRes.getSimilarities()));
+        System.out.println("tableNameRes = " + Arrays.toString(testProcessedRes.getTableNameRes()));
+        System.out.println("startIDRes = " + Arrays.toString(testProcessedRes.getStartIDRes()));
+        System.out.println(Arrays.toString(radianRes));
+        System.out.println(Arrays.toString(ratioRes));
         System.out.println(matchLen);
         endTime=System.currentTimeMillis(); //获取结束时间
         System.out.println("程序运行时间： "+(endTime-startTime)+"ms");
@@ -292,12 +348,53 @@ public class ProcessedTableServiceImpl extends ServiceImpl<ProcessedTableMapper,
 
 
     /**
+     * 获取特征值，暂定极大值极小值顺序
+     * @param ma5Delta  ma5数据
+     * @return 特征值
+     */
+    private String getFeature(double[] ma5Delta) {
+        double maxOrigin = 0;
+        double minOrigin = 0;
+        // 最大极大值
+        int maxIndex = 0;
+        // 最小极小值
+        int minIndex = 0;
+        double lastOrigin = 0;
+        for (int i = 0; i < ma5Delta.length-1; i++) {
+            lastOrigin += ma5Delta[i];
+            if (ma5Delta[i]>0&&ma5Delta[i+1]<0){
+                if (maxOrigin==0){
+                    maxOrigin = lastOrigin;
+                }
+                if (lastOrigin>maxOrigin){
+                    maxOrigin=lastOrigin;
+                    maxIndex = i;
+                }
+            }
+            if (ma5Delta[i]<0&&ma5Delta[i+1]>0){
+                if (minOrigin==0){
+                    minOrigin = lastOrigin;
+                }
+                if (lastOrigin<minOrigin){
+                    minOrigin=lastOrigin;
+                    minIndex = i;
+                }
+            }
+        }
+        if (maxIndex>minIndex){
+            return "DU";
+        }
+        return "UD";
+    }
+
+
+    /**
      * 返回sub_str在main_str中出现的所有索引集合
      * @param main_str 主串
      * @param sub_str  搜索Key
      * @return 所有索引集合
      */
-    public ArrayList<Integer> searchAllIndex(String main_str, String sub_str) {
+    private ArrayList<Integer> searchAllIndex(String main_str, String sub_str) {
         int a = main_str.indexOf(sub_str);//*第一个出现的索引位置
         ArrayList<Integer> res = new ArrayList<>();
         while (a != -1) {

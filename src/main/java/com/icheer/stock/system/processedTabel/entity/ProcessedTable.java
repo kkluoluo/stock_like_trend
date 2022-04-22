@@ -19,5 +19,4 @@ public class ProcessedTable implements Serializable {
     private Integer pointDelta;
     private String ma5TrendLetter;
     private Double ma5Radian;
-    private String ma5TrendLetterRefine;
 }

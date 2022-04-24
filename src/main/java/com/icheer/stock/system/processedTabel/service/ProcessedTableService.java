@@ -14,8 +14,5 @@ public interface ProcessedTableService extends IService<ProcessedTable> {
 
     ArrayList<String> listHS300();
 
-    ArrayList<ProcessedTable> listDescById(String table_name);
-
-
     List<StockSimilar> getKLineSimilar(StockMap stockMap);
 }

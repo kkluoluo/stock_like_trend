@@ -93,16 +93,7 @@ public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData
         IPage<StockTradeResult>  tradeResultIPage = new Page<>();
         /**分类搜索**/
 
-//        if (stockMap.getCode()!=null & stockMap.getCode()!="")
-//        {
-//            userHistoryService.setSearchHistory(Integer.valueOf(userId.toString()),stockMap.getCode());
-//            StockInfo stock= stockInfoService.getOneByCode(stockMap.getCode());
-//            if(stock != null)
-//            {
-//                stockTradeResults.add(getStockTradeResult(stock));
-//            }
-//        }else
-//        {
+
             IPage<StockInfo>  page = new Page<>();
             page.setSize(stockMap.getPageSize());
             page.setCurrent(stockMap.getPageNum());
@@ -255,7 +246,6 @@ public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData
         similar_cp.setTradeData(cpTradeDataList);
 
         similarList.add(0,similar_cp);
-        System.out.println(k_list);
         return similarList;
     }
 
@@ -298,7 +288,7 @@ public class TradeDataServiceImpl extends ServiceImpl<TradeDataMapper, TradeData
             code_id.put(each.getCode(),trade_id);
         }
         Collections.sort(k_list,Collections.reverseOrder());
-        System.out.println(k_list);
+//        System.out.println(k_list);
         List<StockSimilar> similarList = new ArrayList<>();
         for( double similar:k_list.subList(0,10))
         {

@@ -18,14 +18,15 @@ return List<日线行情>[上证，深证，创业板]
 > 个股搜索接口
 
 ```
-GET http://localhost:8099/test/stock_analysis
+GET http://localhost:8099/api/search_stock
 Content-Type: application/json
 
 {
-  "code": "000001",
-  "range": 120,
-  "preRange": 5,
-  "model":"Kp"
+  "code": "0000",
+  "name": "",
+  "pageSize": 10,
+  "pageNum": "1"
+
 }
 
 ```

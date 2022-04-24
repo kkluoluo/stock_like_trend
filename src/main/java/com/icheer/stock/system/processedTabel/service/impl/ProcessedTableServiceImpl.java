@@ -42,10 +42,6 @@ public class ProcessedTableServiceImpl extends ServiceImpl<ProcessedTableMapper,
         return processedTableMapper.listHS300();
     }
 
-    @Override
-    public ArrayList<ProcessedTable> listDescById(String table_name) {
-        return processedTableMapper.listDescById(table_name);
-    }
 
     @Override
     public List<StockSimilar> getKLineSimilar(StockMap stockMap) {

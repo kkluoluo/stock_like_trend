@@ -4,6 +4,7 @@ import com.icheer.stock.framework.interceptor.RequestUtils;
 import com.icheer.stock.framework.interceptor.redis.RedisLock;
 import com.icheer.stock.util.Result;
 import com.icheer.stock.util.ServletUtils;
+import net.sf.jsqlparser.expression.DateTimeLiteralExpression;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -14,8 +15,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import javax.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
+
+import static com.fasterxml.jackson.databind.type.LogicalType.DateTime;
 
 @Aspect
 @Component
@@ -43,7 +48,12 @@ public class RepeatSubmitAspect {
         String path = request.getServletPath();
         String key = getKey(token, path);
         String clientId = getClientId();
-
+        LocalTime UpdateTime = LocalTime.of(23,0);
+        LOGGER.info("time now = [{}], clientId = [{}]",LocalTime.now(), UpdateTime);
+        if (LocalTime.now().getHour()==UpdateTime.getHour())
+        {
+            return new Result(200, "每日23点-24点为数据库更新时间段，请稍后再试", null);
+        }
         boolean isSuccess = redisLock.tryLock(key, clientId, lockSeconds);
         LOGGER.info("tryLock key = [{}], clientId = [{}]", key, clientId);
 
